@@ -22,13 +22,15 @@ class DailyPlanScreen extends ConsumerWidget {
             Expanded(child: PlanTimeline(plan: plan)),
         ],
       ),
-      floatingActionButton: plan==null ? null : FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: 루틴 추가
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('루틴 추가'),
-      ),
+      floatingActionButton: plan == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () {
+                // TODO: 루틴 추가
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('루틴 추가'),
+            ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app.dart';
+import '../themes/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,18 +12,24 @@ class HomeScreen extends StatelessWidget {
         icon: Icons.calendar_today,
         title: 'Daily Plan',
         subtitle: '일상 루틴 관리',
+        iconBgColor: AppColors.primary,
+        iconColor: AppColors.white,
         onTap: () => Navigator.pushNamed(context, Routes.dailyPlan),
       ),
       _HomeCard(
         icon: Icons.event_note,
         title: 'Calendar',
         subtitle: '일정/프로젝트 보기',
+        iconBgColor: AppColors.secondary,
+        iconColor: AppColors.black,
         onTap: () => Navigator.pushNamed(context, Routes.calendar),
       ),
       _HomeCard(
         icon: Icons.note_alt,
         title: 'Notes',
         subtitle: '메모·마크다운',
+        iconBgColor: AppColors.tertiary,
+        iconColor: AppColors.white,
         onTap: () => Navigator.pushNamed(context, Routes.note),
       ),
     ];
@@ -58,12 +65,16 @@ class _HomeCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final Color iconBgColor;
+  final Color iconColor;
   final VoidCallback onTap;
 
   const _HomeCard({
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.iconBgColor,
+    required this.iconColor,
     required this.onTap,
   });
 
@@ -85,8 +96,8 @@ class _HomeCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: cs.primaryContainer,
-                child: Icon(icon, color: cs.onPrimaryContainer, size: 28),
+                backgroundColor: iconBgColor,
+                child: Icon(icon, color: iconColor, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -96,7 +107,10 @@ class _HomeCard extends StatelessWidget {
                   children: [
                     Text(title, style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),

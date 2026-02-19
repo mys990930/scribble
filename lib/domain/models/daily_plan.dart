@@ -17,13 +17,18 @@ class DailyPlan {
   });
   bool get isOneOff => date != null;
 
-factory DailyPlan.fromJson(Map<String, dynamic> j) => DailyPlan(
+  factory DailyPlan.fromJson(Map<String, dynamic> j) => DailyPlan(
     id: j['id'],
     name: j['name'],
-    days: j['days'] == null ? null
-      : (j['days'] as List<dynamic>).map((s) => Weekday.values.firstWhere((e) => e.name == s)).toList(),
+    days: j['days'] == null
+        ? null
+        : (j['days'] as List<dynamic>)
+              .map((s) => Weekday.values.firstWhere((e) => e.name == s))
+              .toList(),
     date: j['date'] == null ? null : DateTime.parse(j['date']),
-    routines: (j['routines'] as List<dynamic>).map((x) => Routine.fromJson(x)).toList(),
+    routines: (j['routines'] as List<dynamic>)
+        .map((x) => Routine.fromJson(x))
+        .toList(),
   );
 
   Map<String, dynamic> toJson() => {

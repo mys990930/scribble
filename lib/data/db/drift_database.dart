@@ -6,21 +6,34 @@ import 'package:path/path.dart' as p;
 
 import 'daos/daily_plan_dao.dart';
 import 'daos/routine_dao.dart';
+import 'daos/memo_dao.dart';
 
 part 'drift_database.g.dart';
 part 'tables.dart';
 
-@DriftDatabase(tables: [DailyPlans, PlanDays, Routines], daos: [DailyPlanDao, RoutineDao])
+@DriftDatabase(
+  tables: [DailyPlans, PlanDays, Routines, Memos],
+  daos: [DailyPlanDao, RoutineDao, MemoDao],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_open());
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async => await m.createAll(),
     onUpgrade: (m, from, to) async {
-      // schemaVersion 변경 시 마이그레이션 작성
+      if (from < 2) {
+        await m.createTable(memos);
+      }
+      if (from < 3) {
+        await m.addColumn(memos, memos.dueAt);
+      }
+      if (from < 4) {
+        await m.addColumn(memos, memos.alarmEnabled);
+        await m.addColumn(memos, memos.alarmNotifiedAt);
+      }
     },
   );
 }

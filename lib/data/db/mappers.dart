@@ -7,7 +7,7 @@ import '../../domain/models/enums.dart' as Dm;
 import 'drift_database.dart';
 
 const _uuid = Uuid();
-final _anchor = DateTime(1970,1,1); // 요일 플랜의 앵커 날짜
+final _anchor = DateTime(1970, 1, 1); // 요일 플랜의 앵커 날짜
 
 // enum 매핑
 Dm.Weekday toDomainWeekday(WeekdayD d) => Dm.Weekday.values[d.index];
@@ -17,9 +17,15 @@ Dm.RoutineType toDomainTag(RoutineTypeD d) => Dm.RoutineType.values[d.index];
 RoutineTypeD toDbTag(Dm.RoutineType d) => RoutineTypeD.values[d.index];
 
 // 요일 플랜: HH:MM만 유지하도록 앵커 날짜로 저장/복원
-DateTime toAnchored(DateTime t) => DateTime(_anchor.year,_anchor.month,_anchor.day, t.hour, t.minute);
-DateTime combineDateAndTime(DateTime date, DateTime anchoredTime) =>
-    DateTime(date.year, date.month, date.day, anchoredTime.hour, anchoredTime.minute);
+DateTime toAnchored(DateTime t) =>
+    DateTime(_anchor.year, _anchor.month, _anchor.day, t.hour, t.minute);
+DateTime combineDateAndTime(DateTime date, DateTime anchoredTime) => DateTime(
+  date.year,
+  date.month,
+  date.day,
+  anchoredTime.hour,
+  anchoredTime.minute,
+);
 
 // ---- DailyPlan <-> Companions ----
 DailyPlansCompanion toPlanCompanion(D.DailyPlan p) => DailyPlansCompanion(
@@ -28,12 +34,19 @@ DailyPlansCompanion toPlanCompanion(D.DailyPlan p) => DailyPlansCompanion(
   date: Value(p.date), // null if recurring
 );
 
-List<PlanDaysCompanion> toPlanDaysCompanions(String planId, List<Dm.Weekday>? days) {
+List<PlanDaysCompanion> toPlanDaysCompanions(
+  String planId,
+  List<Dm.Weekday>? days,
+) {
   if (days == null) return [];
-  return days.map((wd)=> PlanDaysCompanion(
-    planId: Value(planId),
-    weekday: Value(toDbWeekday(wd)),
-  )).toList();
+  return days
+      .map(
+        (wd) => PlanDaysCompanion(
+          planId: Value(planId),
+          weekday: Value(toDbWeekday(wd)),
+        ),
+      )
+      .toList();
 }
 
 // ---- Routines ----

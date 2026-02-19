@@ -17,7 +17,7 @@ class Routine {
     required this.tag,
   });
 
-   int get minutes => endTime.difference(startTime).inMinutes;
+  int get minutes => endTime.difference(startTime).inMinutes;
 
   factory Routine.fromJson(Map<String, dynamic> json) {
     return Routine(

@@ -1,11 +1,16 @@
-// 고정 Quick Tag 팔레트 (테마 교체로 전체 팔레트만 바꿀 수 있게 구성)
+// Quick Tag palette mapped to app design tokens
 class RoutinePalette {
-  final int work;   // ex) red
-  final int rest;   // ex) green
-  final int sleep;  // ex) blue
+  final int work;
+  final int rest;
+  final int sleep;
   const RoutinePalette({
-    this.work = 0xFFE53935,  // red 600
-    this.rest = 0xFF43A047,  // green 600
-    this.sleep = 0xFF1E88E5, // blue 600
+    this.work = 0xFFE6535E, // primary
+    this.rest = 0xFF6BBC8A, // tertiary
+    this.sleep = 0xFF58C3EC, // accent cool
   });
+
+  const RoutinePalette.fromTokens()
+    : work = 0xFFE6535E,
+      rest = 0xFF6BBC8A,
+      sleep = 0xFF58C3EC;
 }

@@ -22,7 +22,9 @@ class DriftDailyPlanRepo implements DailyPlanRepo {
   final AppDatabase db;
   final DailyPlanDao planDao;
   final RoutineDao routineDao;
-  DriftDailyPlanRepo(this.db): planDao = DailyPlanDao(db), routineDao = RoutineDao(db);
+  DriftDailyPlanRepo(this.db)
+    : planDao = DailyPlanDao(db),
+      routineDao = RoutineDao(db);
 
   @override
   Future<List<D.DailyPlan>> loadAll() async {
@@ -32,19 +34,31 @@ class DriftDailyPlanRepo implements DailyPlanRepo {
       final ds = await planDao.getDays(p.id);
       final rs = await routineDao.getRoutinesByPlan(p.id);
 
-      final days = ds.isEmpty ? null : ds.map((d)=> toDomainWeekday(d.weekday)).toList();
-      final routines = rs.map((r)=> D.Routine(
-        id: r.id,
-        name: r.name,
-        detail: r.detail,
-        startTime: r.startTime,
-        endTime: r.endTime,
-        tag: toDomainTag(r.tag),
-      )).toList();
+      final days = ds.isEmpty
+          ? null
+          : ds.map((d) => toDomainWeekday(d.weekday)).toList();
+      final routines = rs
+          .map(
+            (r) => D.Routine(
+              id: r.id,
+              name: r.name,
+              detail: r.detail,
+              startTime: r.startTime,
+              endTime: r.endTime,
+              tag: toDomainTag(r.tag),
+            ),
+          )
+          .toList();
 
-      result.add(D.DailyPlan(
-        id: p.id, name: p.name, date: p.date, days: days, routines: routines,
-      ));
+      result.add(
+        D.DailyPlan(
+          id: p.id,
+          name: p.name,
+          date: p.date,
+          days: days,
+          routines: routines,
+        ),
+      );
     }
     return result;
   }
@@ -55,7 +69,10 @@ class DriftDailyPlanRepo implements DailyPlanRepo {
     for (final r in plan.routines) {
       validateRoutineTimes(r.startTime, r.endTime);
     }
-    validateNoOverlap(plan.routines.map((e)=>e.startTime), plan.routines.map((e)=>e.endTime));
+    validateNoOverlap(
+      plan.routines.map((e) => e.startTime),
+      plan.routines.map((e) => e.endTime),
+    );
 
     final comp = toPlanCompanion(plan);
     final daysComp = toPlanDaysCompanions(plan.id, plan.days);
@@ -74,10 +91,18 @@ class DriftDailyPlanRepo implements DailyPlanRepo {
   @override
   Future<List<D.Routine>> loadRoutines(String planId) async {
     final rs = await routineDao.getRoutinesByPlan(planId);
-    return rs.map((r)=> D.Routine(
-      id: r.id, name: r.name, detail: r.detail,
-      startTime: r.startTime, endTime: r.endTime, tag: toDomainTag(r.tag),
-    )).toList();
+    return rs
+        .map(
+          (r) => D.Routine(
+            id: r.id,
+            name: r.name,
+            detail: r.detail,
+            startTime: r.startTime,
+            endTime: r.endTime,
+            tag: toDomainTag(r.tag),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -87,12 +112,18 @@ class DriftDailyPlanRepo implements DailyPlanRepo {
     // 여기서도 최신 목록을 읽어 수행:
     final all = await loadRoutines(plan.id);
     final merged = [
-      for (final x in all) if (x.id != r.id) x, r
+      for (final x in all)
+        if (x.id != r.id) x,
+      r,
     ];
-    validateNoOverlap(merged.map((e)=>e.startTime), merged.map((e)=>e.endTime));
+    validateNoOverlap(
+      merged.map((e) => e.startTime),
+      merged.map((e) => e.endTime),
+    );
     await routineDao.upsertRoutine(toRoutineCompanion(plan: plan, r: r));
   }
 
   @override
-  Future<void> deleteRoutine(String routineId) => routineDao.deleteRoutine(routineId);
+  Future<void> deleteRoutine(String routineId) =>
+      routineDao.deleteRoutine(routineId);
 }

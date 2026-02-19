@@ -2,26 +2,30 @@ part of 'drift_database.dart';
 
 // ==== TypeConverters: enums ====
 enum WeekdayD { MON, TUE, WED, THU, FRI, SAT, SUN }
+
 enum RoutineTypeD { SLEEP, EAT, WORK, PLAY, SELFDEV }
 
 class WeekdayConv extends TypeConverter<WeekdayD, String> {
   const WeekdayConv();
   @override
-  WeekdayD fromSql(String from) => WeekdayD.values.firstWhere((e)=>e.name==from);
+  WeekdayD fromSql(String from) =>
+      WeekdayD.values.firstWhere((e) => e.name == from);
   @override
   String toSql(WeekdayD value) => value.name;
 }
+
 class RoutineTypeConv extends TypeConverter<RoutineTypeD, String> {
   const RoutineTypeConv();
   @override
-  RoutineTypeD fromSql(String from) => RoutineTypeD.values.firstWhere((e)=>e.name==from);
+  RoutineTypeD fromSql(String from) =>
+      RoutineTypeD.values.firstWhere((e) => e.name == from);
   @override
   String toSql(RoutineTypeD value) => value.name;
 }
 
 // ==== Tables ====
 class DailyPlans extends Table {
-  TextColumn get id => text()();         // uuid string
+  TextColumn get id => text()(); // uuid string
   TextColumn get name => text()();
   DateTimeColumn get date => dateTime().nullable()(); // one-off only
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -47,6 +51,21 @@ class Routines extends Table {
   DateTimeColumn get startTime => dateTime()();
   DateTimeColumn get endTime => dateTime()();
   TextColumn get tag => text().map(const RoutineTypeConv())(); // SLEEP/...
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class Memos extends Table {
+  TextColumn get id => text()(); // uuid
+  TextColumn get content => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isResolved => boolean().withDefault(const Constant(false))();
+  IntColumn get urgentOrder => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dueAt => dateTime().nullable()();
+  BoolColumn get alarmEnabled => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get alarmNotifiedAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};
