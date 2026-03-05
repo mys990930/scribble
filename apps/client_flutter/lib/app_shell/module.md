@@ -12,6 +12,7 @@
 - **플랫폼 조건부 DI** (`di/` — 네이티브: SQLite, 웹: API)
 - 위젯 동기화 게이트 (_WidgetSyncGate) — 네이티브 전용, 웹에서 비활성
 - 앱 resume 시 동기화 트리거 — 네이티브 전용
+- 앱 시작 시 pending share 확인 및 ui-archive 공유 플로우 전달
 - HomeScreen (탭 네비게이션)
 
 ## 비책임
