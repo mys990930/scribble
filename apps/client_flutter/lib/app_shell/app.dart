@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,11 +50,13 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _consumePendingWidgetMemo();
-      await _syncWidget();
-    });
-    _timer = Timer.periodic(const Duration(minutes: 5), (_) => _syncWidget());
+    if (!kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _consumePendingWidgetMemo();
+        await _syncWidget();
+      });
+      _timer = Timer.periodic(const Duration(minutes: 5), (_) => _syncWidget());
+    }
   }
 
   @override
@@ -65,6 +68,7 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (kIsWeb) return;
     if (state == AppLifecycleState.resumed) {
       _consumePendingWidgetMemo();
       _syncWidget();
@@ -117,9 +121,11 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<List<Memo>>>(activeMemosProvider, (previous, next) {
-      next.whenData((memos) => _syncWidgetFromMemos(memos));
-    });
+    if (!kIsWeb) {
+      ref.listen<AsyncValue<List<Memo>>>(activeMemosProvider, (previous, next) {
+        next.whenData((memos) => _syncWidgetFromMemos(memos));
+      });
+    }
     return widget.child;
   }
 }
