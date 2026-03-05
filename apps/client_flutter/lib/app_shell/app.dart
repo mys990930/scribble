@@ -44,6 +44,8 @@ class _WidgetSyncGate extends ConsumerStatefulWidget {
 class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
     with WidgetsBindingObserver {
   static const _widgetChannel = MethodChannel('scribble/widget');
+  static const _shareChannel = MethodChannel('scribble/share_intent');
+  Map<String, dynamic>? _pendingSharePayload;
   Timer? _timer;
 
   @override
@@ -53,6 +55,7 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
     if (!kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _consumePendingWidgetMemo();
+        await _consumePendingShare();
         await _syncWidget();
       });
       _timer = Timer.periodic(const Duration(minutes: 5), (_) => _syncWidget());
@@ -71,6 +74,7 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
     if (kIsWeb) return;
     if (state == AppLifecycleState.resumed) {
       _consumePendingWidgetMemo();
+      _consumePendingShare();
       _syncWidget();
     }
   }
@@ -94,6 +98,16 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
       if (text.isEmpty) return;
       await ref.read(memoServiceProvider).addMemo(text, dueAt: dueAt);
       ref.invalidate(activeMemosProvider);
+    } catch (_) {}
+  }
+
+  Future<void> _consumePendingShare() async {
+    try {
+      final raw = await _shareChannel.invokeMapMethod<String, dynamic>(
+        'consumePendingShare',
+      );
+      if (raw == null || raw.isEmpty) return;
+      _pendingSharePayload = raw;
     } catch (_) {}
   }
 
