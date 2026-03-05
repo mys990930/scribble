@@ -11,9 +11,9 @@
 - category null → 전체
 
 ## SendToNote
-- 정상 archive → Note 생성 확인 (note_usecases 호출)
+- 정상 archive → note_usecases ingest 호출 확인
 - 존재하지 않는 archiveId → `ARCHIVE_NOT_FOUND`
 
 ## 경계 케이스
 - 여러 URL 포함 텍스트 → 첫 번째 URL 사용
-- 이미지 없는 페이지 → imageUrl=null, 여전히 full
+- 이미지 없는 페이지(fetch 성공) → imageUrl=null, 여전히 full

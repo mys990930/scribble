@@ -27,6 +27,13 @@
 | imageUrl | String? | 대표 이미지 |
 | success | bool | 수집 성공 여부 |
 
+### SharedContent
+
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| rawText | String | 공유된 원문 텍스트 |
+| category | String | 저장 카테고리 |
+
 ## Usecase
 
 | 이름 | 입력 | 출력 | 설명 |
@@ -34,11 +41,17 @@
 | HandleShare | SharedContent | ArchiveEntry | URL 파싱 → fetch → 폴백 → 저장 |
 | ListArchives | category? | List\<ArchiveEntry\> | 전체 또는 카테고리별 |
 | DeleteArchive | archiveId | void | 삭제 |
-| SendToNote | archiveId | Note | Archive→Note 전환 |
+| SendToNote | archiveId | void | Archive→Note 전환 |
+
+## 에러
+
+| 코드 | 설명 |
+|---|---|
+| `ARCHIVE_NOT_FOUND` | 조회 대상 없음 |
 
 ## 수집 흐름
 
 1. SharedContent에서 URL 추출 시도
 2. URL 있으면 → UrlFetcher.fetch() 호출
-3. 성공 → captureType=full로 저장
+3. 성공 → captureType=full로 저장 (imageUrl은 null 가능)
 4. 실패 또는 URL 없음 → 원본 텍스트로 captureType=fallback 저장

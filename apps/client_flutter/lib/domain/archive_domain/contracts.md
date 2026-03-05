@@ -19,8 +19,8 @@
 
 `full | fallback | manual`
 
-- `full`: URL + 이미지 정상 수집
-- `fallback`: URL만 또는 텍스트만 저장
+- `full`: 수집(fetch) 성공으로 생성됨 (imageUrl은 null일 수 있음)
+- `fallback`: 수집 실패 또는 URL 미존재 상태에서 원문 기반 저장
 - `manual`: 사용자 직접 입력
 
 ## 에러
@@ -29,4 +29,3 @@
 |---|---|
 | `ARCHIVE_EMPTY_CONTENT` | title과 body 모두 빈 문자열 |
 | `ARCHIVE_INVALID_CATEGORY` | 카테고리 빈 문자열 |
-| `ARCHIVE_NOT_FOUND` | 조회 대상 없음 |
