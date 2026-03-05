@@ -17,7 +17,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_open());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -32,6 +32,20 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(memos, memos.alarmEnabled);
         await m.addColumn(memos, memos.alarmNotifiedAt);
+      }
+      if (from < 5) {
+        await customStatement('''
+          CREATE TABLE IF NOT EXISTS archives (
+            id TEXT PRIMARY KEY NOT NULL,
+            url TEXT,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            image_url TEXT,
+            category TEXT NOT NULL,
+            capture_type TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+          )
+        ''');
       }
     },
   );
