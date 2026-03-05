@@ -154,6 +154,7 @@
 - `ui-memo`
 - `ui-note`
 - `ui-archive`
+- `share-intent` — OS 공유(Share Intent) 수신 bridge adapter, payload를 archive-usecases로 전달
 - `widget-todo`
 - `widget-calendar`
 - `widget-dailyplan`

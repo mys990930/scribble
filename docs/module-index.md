@@ -27,7 +27,7 @@
 | archive-usecases | `lib/usecases/archive_usecases/` | Share 수신, 수집, Archive→Note |
 | sync | `lib/usecases/sync/` | 동기화 (outbox/inbox/conflict/cursor) |
 
-### Platform Adapters — Client (11)
+### Platform Adapters — Client (12)
 | 모듈 | 위치 | 설명 |
 |---|---|---|
 | app-shell | `lib/app_shell/` | 진입점, 라우팅, **조건부 DI** (`di/`) |
@@ -36,6 +36,7 @@
 | ui-memo | `lib/adapters/ui_memo/` | Memo UI |
 | ui-note | `lib/adapters/ui_note/` | Note UI |
 | ui-archive | `lib/adapters/ui_archive/` | Archive UI |
+| share-intent | `lib/adapters/share_intent/` | OS 공유(Share Intent) payload 수신 후 archive-usecases로 전달 |
 | widget-todo | `lib/adapters/widget_todo/` | Memo 위젯 (네이티브 전용) |
 | widget-calendar | `lib/adapters/widget_calendar/` | Calendar 위젯 (네이티브 전용) |
 | widget-dailyplan | `lib/adapters/widget_dailyplan/` | DailyPlan 위젯 (네이티브 전용) |
@@ -67,6 +68,9 @@
 - `dart.library.io` → `di_native.dart` (DriftMemoService)
 - `dart.library.js_interop` → `di_web.dart` (ApiMemoService)
 - 컴파일 타임에 결정되어 웹 빌드에 dart:ffi 코드가 포함되지 않음
+
+공유 브릿지 흐름:
+- OS Share Intent → `adapters/share_intent` → `archive-usecases(HandleShare)`
 
 ---
 
@@ -102,6 +106,7 @@ graph TD
         UI_MEMO[ui-memo]
         UI_NOTE[ui-note]
         UI_ARC[ui-archive]
+        SHARE[share-intent]
     end
 
     subgraph "Adapters — Widget"
@@ -165,6 +170,7 @@ graph TD
     UI_NOTE --> UI_S
     UI_ARC --> ARC_U
     UI_ARC --> UI_S
+    SHARE --> ARC_U
 
     %% Widget → Domain (타입 참조)
     W_TODO --> MEMO_D
@@ -207,7 +213,7 @@ graph TD
     class K,UI_S shared
     class DP_D,CAL_D,MEMO_D,NOTE_D,ARC_D domain
     class DP_U,CAL_U,MEMO_U,NOTE_U,ARC_U,SYNC usecase
-    class UI_DP,UI_CAL,UI_MEMO,UI_NOTE,UI_ARC,W_TODO,W_CAL,W_DP,SHELL,SQLITE,API adapter
+    class UI_DP,UI_CAL,UI_MEMO,UI_NOTE,UI_ARC,SHARE,W_TODO,W_CAL,W_DP,SHELL,SQLITE,API adapter
     class B_AUTH,B_DEV,B_SYNC backend
 ```
 
