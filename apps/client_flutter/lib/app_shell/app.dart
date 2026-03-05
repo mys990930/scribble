@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:scribble/domain/memo_domain/memo.dart';
+import 'package:scribble/adapters/ui_archive/archive_screen.dart';
 import 'package:scribble/adapters/ui_memo/memo_providers.dart';
 import 'package:scribble/adapters/ui_memo/memo_screen.dart';
 import 'package:scribble/shared/ui/app_theme.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
       routes: {
         Routes.home: (_) => const MemoScreen(),
         Routes.memo: (_) => const MemoScreen(),
+        Routes.archive: (_) => const ArchiveScreen(),
       },
       builder: (context, child) =>
           _WidgetSyncGate(child: child ?? const SizedBox.shrink()),
@@ -45,7 +47,6 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
     with WidgetsBindingObserver {
   static const _widgetChannel = MethodChannel('scribble/widget');
   static const _shareChannel = MethodChannel('scribble/share_intent');
-  Map<String, dynamic>? _pendingSharePayload;
   Timer? _timer;
 
   @override
@@ -106,8 +107,11 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
       final raw = await _shareChannel.invokeMapMethod<String, dynamic>(
         'consumePendingShare',
       );
-      if (raw == null || raw.isEmpty) return;
-      _pendingSharePayload = raw;
+      if (raw == null || raw.isEmpty || !mounted) return;
+      Navigator.of(context).pushNamed(
+        Routes.archive,
+        arguments: {'pendingShare': raw},
+      );
     } catch (_) {}
   }
 
