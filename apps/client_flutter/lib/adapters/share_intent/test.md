@@ -7,6 +7,7 @@
 - fileUris만 수신 → URI 줄 목록 rawText로 HandleShare 호출
 - mixed(text+url+fileUris) → 순서 규칙대로 조합된 rawText로 HandleShare 호출
 - category 미입력 불가(호출자에서 필수 전달)
+- 카테고리 선택 이전 단계에서는 HandleShare 호출 없음(미저장)
 
 ## parseFromPlatform
 - raw.type=text/url/image/file/mixed 파싱 성공

@@ -70,7 +70,7 @@
 - 컴파일 타임에 결정되어 웹 빌드에 dart:ffi 코드가 포함되지 않음
 
 공유 브릿지 흐름:
-- OS Share Intent → `adapters/share_intent` → `archive-usecases(HandleShare)`
+- OS Share Intent → `adapters/share_intent` → `ui-archive` 카테고리 선택 → `archive-usecases(HandleShare)`
 
 ---
 
@@ -170,7 +170,7 @@ graph TD
     UI_NOTE --> UI_S
     UI_ARC --> ARC_U
     UI_ARC --> UI_S
-    SHARE --> ARC_U
+    SHARE --> UI_ARC
 
     %% Widget → Domain (타입 참조)
     W_TODO --> MEMO_D

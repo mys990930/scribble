@@ -8,8 +8,8 @@ OS Share Intent로 전달된 외부 공유 payload를 수신해 `archive-usecase
 
 - 플랫폼별 공유 payload 수신 (text/url)
 - payload를 `SharedContent` 입력 규격으로 매핑
-- `HandleShareUseCase` 호출 트리거
-- 필요 시 카테고리 기본값 적용 (UI/호출자 정책값 사용)
+- 카테고리 선택 완료 후 `HandleShareUseCase` 호출 트리거
+- 카테고리 확정 전에는 저장을 수행하지 않음
 
 ## 비책임
 
