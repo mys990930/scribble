@@ -21,7 +21,7 @@
 | UpdateNote | Note | void | 수정 |
 | DeleteNote | noteId | void | 삭제 |
 | IngestFromMemo | Memo | Note | Memo→Note 변환 저장 |
-| IngestFromArchive | ArchiveEntry | Note | Archive→Note 변환 저장 |
+| IngestFromArchive | ArchiveEntry | void | Archive→Note 변환 저장 |
 
 ## Ingest 규칙
 

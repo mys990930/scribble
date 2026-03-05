@@ -14,6 +14,7 @@
 - url 있는 archive → body 끝에 원본 링크
 - url 없는 archive → 본문만
 - tags에 category + "from-archive" 포함
+- 반환값 없이(note 타입 의존 없이) ingest 호출 성공 확인
 
 ## 경계 케이스
 - Memo content 빈 문자열 → 에러 (도메인 규칙)
