@@ -5,7 +5,7 @@ part 'memo_dao.g.dart';
 
 @DriftAccessor(tables: [Memos])
 class MemoDao extends DatabaseAccessor<AppDatabase> with _$MemoDaoMixin {
-  MemoDao(AppDatabase db) : super(db);
+  MemoDao(super.db);
 
   Future<List<Memo>> listActive() {
     return (select(memos)

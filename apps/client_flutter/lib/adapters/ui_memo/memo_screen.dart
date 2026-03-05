@@ -81,8 +81,9 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
     final memos = await ref.read(memoServiceProvider).listActiveMemos();
     final now = DateTime.now();
     for (final m in memos) {
-      if (!m.alarmEnabled || m.dueAt == null || m.alarmNotifiedAt != null)
+      if (!m.alarmEnabled || m.dueAt == null || m.alarmNotifiedAt != null) {
         continue;
+      }
       final total = m.dueAt!.difference(m.createdAt).inMinutes;
       if (total <= 0) continue;
       final remaining = m.dueAt!.difference(now).inMinutes;
@@ -305,8 +306,9 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
       ),
       body: asyncMemos.when(
         data: (memos) {
-          if (memos.isEmpty)
+          if (memos.isEmpty) {
             return const Center(child: Text('No memos yet. Tap + to add one.'));
+          }
 
           return ReorderableListView.builder(
             itemCount: memos.length,
