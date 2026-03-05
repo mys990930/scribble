@@ -2,6 +2,12 @@
 
 ## 전체 모듈 목록
 
+### Shared (2)
+| 모듈 | 위치 | 설명 |
+|---|---|---|
+| shared/kernel | `lib/shared/kernel/` | ID, Result, AppError, TimeUtils, EventBus |
+| shared/ui | `lib/shared/ui/` | AppColors, 테마, 공통 UI |
+
 ### Domain Core (5)
 | 모듈 | 위치 | 설명 |
 |---|---|---|
@@ -24,17 +30,17 @@
 ### Platform Adapters — Client (11)
 | 모듈 | 위치 | 설명 |
 |---|---|---|
-| app-shell | `lib/app_shell/` | 진입점, 라우팅, DI |
+| app-shell | `lib/app_shell/` | 진입점, 라우팅, **조건부 DI** (`di/`) |
 | ui-dailyplan | `lib/adapters/ui_dailyplan/` | Daily Plan UI |
 | ui-calendar | `lib/adapters/ui_calendar/` | Calendar UI |
 | ui-memo | `lib/adapters/ui_memo/` | Memo UI |
 | ui-note | `lib/adapters/ui_note/` | Note UI |
 | ui-archive | `lib/adapters/ui_archive/` | Archive UI |
-| widget-todo | `lib/adapters/widget_todo/` | Memo 위젯 |
-| widget-calendar | `lib/adapters/widget_calendar/` | Calendar 위젯 |
-| widget-dailyplan | `lib/adapters/widget_dailyplan/` | DailyPlan 위젯 |
-| storage-sqlite | `lib/adapters/storage_sqlite/` | Drift DB 구현 |
-| api-client | `lib/adapters/api_client/` | 백엔드 HTTP 클라이언트 |
+| widget-todo | `lib/adapters/widget_todo/` | Memo 위젯 (네이티브 전용) |
+| widget-calendar | `lib/adapters/widget_calendar/` | Calendar 위젯 (네이티브 전용) |
+| widget-dailyplan | `lib/adapters/widget_dailyplan/` | DailyPlan 위젯 (네이티브 전용) |
+| storage-sqlite | `lib/adapters/storage_sqlite/` | Drift DB 구현 **(네이티브 전용)** |
+| api-client | `lib/adapters/api_client/` | 백엔드 HTTP + **웹 CRUD (ApiMemoService)** |
 
 ### Platform Adapters — Backend (3)
 | 모듈 | 위치 | 설명 |
@@ -45,12 +51,32 @@
 
 ---
 
+## 플랫폼별 데이터 흐름
+
+```
+네이티브 (모바일/데스크톱):
+  UI → memoServiceProvider → DriftMemoService → SQLite
+                                                  ↕ (sync)
+                                              서버 API
+
+웹:
+  UI → memoServiceProvider → ApiMemoService → 서버 API (직접)
+```
+
+조건부 DI (`app_shell/di/`):
+- `dart.library.io` → `di_native.dart` (DriftMemoService)
+- `dart.library.js_interop` → `di_web.dart` (ApiMemoService)
+- 컴파일 타임에 결정되어 웹 빌드에 dart:ffi 코드가 포함되지 않음
+
+---
+
 ## 의존 관계 다이어그램
 
 ```mermaid
 graph TD
     subgraph "Shared"
         K[shared/kernel]
+        UI_S[shared/ui]
     end
 
     subgraph "Domain Core"
@@ -85,9 +111,9 @@ graph TD
     end
 
     subgraph "Adapters — Infra"
-        SHELL[app-shell]
-        SQLITE[storage-sqlite]
-        API[api-client]
+        SHELL[app-shell + di/]
+        SQLITE[storage-sqlite<br>네이티브 전용]
+        API[api-client<br>sync + 웹 CRUD]
     end
 
     subgraph "Backend"
@@ -128,34 +154,43 @@ graph TD
     MEMO_U -.->|Memo→Note| NOTE_U
     MEMO_U -.->|Memo→Calendar| CAL_U
 
-    %% UI → Usecases
+    %% UI → Usecases + shared/ui
     UI_DP --> DP_U
+    UI_DP --> UI_S
     UI_CAL --> CAL_U
+    UI_CAL --> UI_S
     UI_MEMO --> MEMO_U
+    UI_MEMO --> UI_S
     UI_NOTE --> NOTE_U
+    UI_NOTE --> UI_S
     UI_ARC --> ARC_U
+    UI_ARC --> UI_S
 
-    %% Widget → Usecases
-    W_TODO --> MEMO_U
-    W_CAL --> CAL_U
-    W_DP --> DP_U
+    %% Widget → Domain (타입 참조)
+    W_TODO --> MEMO_D
+    W_CAL --> CAL_D
+    W_DP --> DP_D
 
-    %% Infra
-    SQLITE -.->|implements repos| DP_U
-    SQLITE -.->|implements repos| CAL_U
-    SQLITE -.->|implements repos| MEMO_U
-    SQLITE -.->|implements repos| NOTE_U
-    SQLITE -.->|implements repos| ARC_U
+    %% Infra implements
+    SQLITE -.->|implements| MEMO_U
+    SQLITE -.->|implements| DP_U
+    SQLITE -.->|implements| CAL_U
+    SQLITE -.->|implements| NOTE_U
+    SQLITE -.->|implements| ARC_U
     SQLITE -.->|implements SyncStorage| SYNC
     API -.->|implements SyncRemote| SYNC
+    API -.->|implements MemoService<br>웹 전용| MEMO_U
 
-    %% App Shell
+    %% App Shell — 조건부 DI
     SHELL --> UI_DP
     SHELL --> UI_CAL
     SHELL --> UI_MEMO
     SHELL --> UI_NOTE
     SHELL --> UI_ARC
     SHELL --> SYNC
+    SHELL --> UI_S
+    SHELL -.->|네이티브| SQLITE
+    SHELL -.->|웹| API
 
     %% Backend
     API -->|HTTP| B_SYNC
@@ -169,7 +204,7 @@ graph TD
     classDef backend fill:#a55eea,color:#fff
     classDef shared fill:#747d8c,color:#fff
 
-    class K shared
+    class K,UI_S shared
     class DP_D,CAL_D,MEMO_D,NOTE_D,ARC_D domain
     class DP_U,CAL_U,MEMO_U,NOTE_U,ARC_U,SYNC usecase
     class UI_DP,UI_CAL,UI_MEMO,UI_NOTE,UI_ARC,W_TODO,W_CAL,W_DP,SHELL,SQLITE,API adapter
@@ -178,5 +213,5 @@ graph TD
 
 ### 범례
 - **실선 화살표** → 직접 의존 (import)
-- **점선 화살표** → 인터페이스 주입 또는 타입 참조
+- **점선 화살표** → 인터페이스 주입 또는 조건부 참조
 - 의존 방향: 항상 위 → 아래 (adapter → usecase → domain → kernel)

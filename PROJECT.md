@@ -73,6 +73,15 @@
 - UI는 로컬 상태 기준으로 렌더링
 - 동기화는 별도 Sync 모듈이 비동기 처리
 
+## 3.1.1 웹 플랫폼 데이터 전략
+
+- 웹에서는 SQLite(dart:ffi) 사용 불가 → **서버 API 직접 호출**로 fallback
+- `app_shell/di/`에서 조건부 import(`dart.library.io` / `dart.library.js_interop`)로 컴파일 타임 분기
+- 네이티브: `DriftMemoService` (SQLite, offline-first)
+- 웹: `ApiMemoService` (HTTP, 서버 의존)
+- UI 코드는 `MemoService` 인터페이스만 참조하므로 플랫폼 차이를 인지하지 않음
+- MethodChannel 기반 위젯 동기화도 `kIsWeb` 가드로 웹에서 비활성
+
 ## 3.2 Layered + Modular
 
 전체 구조는 3계층으로 고정한다.

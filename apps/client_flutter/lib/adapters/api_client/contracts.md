@@ -1,6 +1,20 @@
 # api-client contracts
 
-## 엔드포인트 (예정)
+## ApiMemoService (implements MemoService)
+
+웹 플랫폼 전용. 모든 CRUD를 서버 API에 직접 위임한다.
+
+| 메서드 | HTTP | 설명 |
+|---|---|---|
+| listActiveMemos | GET /api/memos?resolved=false | 미완료 메모 목록 |
+| listResolvedMemos | GET /api/memos?resolved=true | 완료 메모 목록 |
+| addMemo | POST /api/memos | 메모 추가 |
+| updateMemo | PUT /api/memos/:id | 메모 수정 |
+| toggleResolved | PATCH /api/memos/:id/resolve | 완료 토글 |
+| deleteMemo | DELETE /api/memos/:id | 메모 삭제 |
+| reorderActiveMemos | PUT /api/memos/reorder | 순서 변경 |
+
+## 동기화 엔드포인트 (네이티브용)
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
