@@ -39,6 +39,11 @@
 | handleIncoming(PlatformSharePayload payload, {required String category}) → Future<void> | payload 수신 후 HandleShare 실행 |
 | parseFromPlatform(Map\<String, dynamic\> raw) → PlatformSharePayload | 플랫폼 raw payload를 표준 계약으로 파싱 |
 
+## MethodChannel
+
+- 채널명: `scribble/share_intent`
+- `consumePendingShare()`: 네이티브 런처에 저장된 공유 payload를 1회 소비
+
 ## 에러
 
 | 코드 | 설명 |
