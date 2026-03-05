@@ -3,6 +3,9 @@ import 'package:scribble/adapters/share_intent/share_intent_adapter.dart';
 import 'package:scribble/usecases/archive_usecases/archive_repository.dart';
 import 'package:scribble/usecases/archive_usecases/handle_share_usecase.dart';
 import 'package:scribble/usecases/archive_usecases/list_archives_usecase.dart';
+import 'package:scribble/usecases/archive_usecases/list_recent_categories_usecase.dart';
+import 'package:scribble/usecases/archive_usecases/search_archives_usecase.dart';
+import 'package:scribble/usecases/archive_usecases/update_archive_usecase.dart';
 import 'package:scribble/usecases/archive_usecases/url_fetcher.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service.dart';
 
@@ -44,4 +47,25 @@ final shareIntentAdapterProvider = Provider<ShareIntentAdapter>((ref) {
   );
 });
 
+final searchArchivesUseCaseProvider = Provider<SearchArchivesUseCase>((ref) {
+  return SearchArchivesUseCase(
+    archiveRepository: ref.watch(archiveRepositoryProvider),
+  );
+});
+
+final listRecentCategoriesUseCaseProvider =
+    Provider<ListRecentCategoriesUseCase>((ref) {
+      return ListRecentCategoriesUseCase(
+        archiveRepository: ref.watch(archiveRepositoryProvider),
+      );
+    });
+
+final updateArchiveUseCaseProvider = Provider<UpdateArchiveUseCase>((ref) {
+  return UpdateArchiveUseCase(
+    archiveRepository: ref.watch(archiveRepositoryProvider),
+  );
+});
+
 final selectedArchiveCategoryProvider = StateProvider<String?>((ref) => null);
+final archiveSearchQueryProvider = StateProvider<String>((ref) => '');
+final lastUsedArchiveCategoryProvider = StateProvider<String>((ref) => 'inbox');

@@ -33,8 +33,42 @@ class InMemoryArchiveRepository implements ArchiveRepository {
   }
 
   @override
+  Future<List<String>> listRecentCategories() async {
+    final ordered = await listAll();
+    final seen = <String>{};
+    final categories = <String>[];
+    for (final entry in ordered) {
+      if (seen.add(entry.category)) {
+        categories.add(entry.category);
+      }
+    }
+    return categories;
+  }
+
+  @override
   Future<void> save(ArchiveEntry entry) async {
     _entries.removeWhere((e) => e.id == entry.id);
     _entries.add(entry);
+  }
+
+  @override
+  Future<List<ArchiveEntry>> search(String query, {String? category}) async {
+    final normalizedQuery = query.trim().toLowerCase();
+    final normalizedCategory = category?.trim();
+
+    Iterable<ArchiveEntry> items = await listAll();
+    if (normalizedCategory != null && normalizedCategory.isNotEmpty) {
+      items = items.where((e) => e.category == normalizedCategory);
+    }
+
+    if (normalizedQuery.isEmpty) {
+      return items.toList();
+    }
+
+    return items.where((e) {
+      return e.title.toLowerCase().contains(normalizedQuery) ||
+          e.body.toLowerCase().contains(normalizedQuery) ||
+          e.category.toLowerCase().contains(normalizedQuery);
+    }).toList();
   }
 }

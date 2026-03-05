@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:scribble/adapters/storage_sqlite/drift_database.dart';
 import 'package:scribble/domain/archive_domain/archive_domain.dart';
 import 'package:scribble/usecases/archive_usecases/archive_repository.dart';
@@ -65,6 +66,18 @@ class DriftArchiveRepository implements ArchiveRepository {
   }
 
   @override
+  Future<List<String>> listRecentCategories() async {
+    await _ensureTable();
+    final rows = await db.customSelect(
+      'SELECT category, MAX(created_at) AS latest FROM archives GROUP BY category ORDER BY latest DESC',
+    ).get();
+    return rows
+        .map((r) => r.data['category'] as String?)
+        .whereType<String>()
+        .toList();
+  }
+
+  @override
   Future<void> save(ArchiveEntry entry) async {
     await _ensureTable();
     await db.customStatement(
@@ -84,6 +97,41 @@ class DriftArchiveRepository implements ArchiveRepository {
         entry.createdAt.millisecondsSinceEpoch,
       ],
     );
+  }
+
+  @override
+  Future<List<ArchiveEntry>> search(String query, {String? category}) async {
+    await _ensureTable();
+    final normalizedQuery = query.trim().toLowerCase();
+    final normalizedCategory = category?.trim();
+
+    final where = <String>[];
+    final variables = <Variable>[];
+
+    if (normalizedQuery.isNotEmpty) {
+      where.add('(LOWER(title) LIKE ? OR LOWER(body) LIKE ? OR LOWER(category) LIKE ?)');
+      final pattern = '%$normalizedQuery%';
+      variables.add(Variable<String>(pattern));
+      variables.add(Variable<String>(pattern));
+      variables.add(Variable<String>(pattern));
+    }
+
+    if (normalizedCategory != null && normalizedCategory.isNotEmpty) {
+      where.add('category = ?');
+      variables.add(Variable<String>(normalizedCategory));
+    }
+
+    final querySql = StringBuffer('SELECT * FROM archives');
+    if (where.isNotEmpty) {
+      querySql.write(' WHERE ${where.join(' AND ')}');
+    }
+    querySql.write(' ORDER BY created_at DESC');
+
+    final rows = await db.customSelect(
+      querySql.toString(),
+      variables: variables,
+    ).get();
+    return rows.map((r) => _toEntry(r.data)).toList();
   }
 
   ArchiveEntry _toEntry(Map<String, Object?> row) {

@@ -22,6 +22,12 @@ class _FakeArchiveRepository implements ArchiveRepository {
 
   @override
   Future<void> save(ArchiveEntry entry) async {}
+
+  @override
+  Future<List<String>> listRecentCategories() async => [];
+
+  @override
+  Future<List<ArchiveEntry>> search(String query, {String? category}) async => [];
 }
 
 class _FakeNoteIngestPort implements NoteIngestPort {

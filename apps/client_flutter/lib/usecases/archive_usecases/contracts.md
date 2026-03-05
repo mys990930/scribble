@@ -8,6 +8,8 @@
 |---|---|
 | listAll() → Future\<List\<ArchiveEntry\>\> | 전체 조회 |
 | listByCategory(String) → Future\<List\<ArchiveEntry\>\> | 카테고리별 |
+| search(String, {category?}) → Future\<List\<ArchiveEntry\>\> | 제목/본문/카테고리 검색 |
+| listRecentCategories() → Future\<List\<String\>\> | 최근 사용 순 카테고리 목록 |
 | getById(String id) → Future\<ArchiveEntry?\> | 단건 조회 |
 | save(ArchiveEntry) → Future\<void\> | 저장 |
 | delete(String id) → Future\<void\> | 삭제 |
@@ -40,6 +42,9 @@
 |---|---|---|---|
 | HandleShare | SharedContent | ArchiveEntry | URL 파싱 → fetch → 폴백 → 저장 |
 | ListArchives | category? | List\<ArchiveEntry\> | 전체 또는 카테고리별 |
+| SearchArchives | query, category? | List\<ArchiveEntry\> | 부분 일치 검색 |
+| ListRecentCategories | - | List\<String\> | 최근 사용 카테고리 조회 |
+| UpdateArchive | archiveId, title, body, category | ArchiveEntry | 상세 수정 저장 |
 | DeleteArchive | archiveId | void | 삭제 |
 | SendToNote | archiveId | void | Archive→Note 전환 |
 
