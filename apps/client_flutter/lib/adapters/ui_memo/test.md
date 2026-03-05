@@ -3,7 +3,7 @@
 ## MemoScreen
 - 빈 목록 → "No memos yet" 메시지 표시
 - 메모 3개 → 3개 카드 렌더링
-- 완료 토글 → activeMemosProvider invalidate 확인
+- 완료 토글 → active/resolved provider invalidate 확인
 - 드래그 재정렬 → reorderActiveMemos 호출 확인
 
 ## MemoEditScreen
@@ -19,15 +19,8 @@
 - Unresolve → toggleResolved(false) 호출
 
 ## 알람
-- 알람 대상 메모 존재 → 로컬 알림 발송, alarmNotifiedAt 갱신
-- 이미 notified → 알림 안 보냄
-- alarmEnabled=false → 알림 안 보냄
-
-## 위젯 동기화
-- 메모 추가 후 → updateMemos 호출 확인
-- consumePendingMemo에 데이터 있음 → 메모 추가
-- consumePendingMemo에 데이터 없음 → 아무 일 없음
+- checkAlarms 결과 존재 → 로컬 알림 발송, alarmNotifiedAt 갱신
+- checkAlarms 결과 없음 → 알림 안 보냄
 
 ## 경계 케이스
 - 빈 content로 Add → 추가 안 됨
-- MethodChannel 실패 → 무시 (try-catch)

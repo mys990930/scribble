@@ -14,4 +14,5 @@ abstract class MemoService {
   Future<void> toggleResolved(String memoId, bool resolved);
   Future<void> deleteMemo(String memoId);
   Future<void> reorderActiveMemos(List<String> idsInUiOrder);
+  Future<List<Memo>> checkAlarms(DateTime now);
 }

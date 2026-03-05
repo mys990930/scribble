@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,8 +9,6 @@ import 'package:scribble/shared/ui/app_colors.dart';
 import 'memo_edit_screen.dart';
 import 'memo_edit_result.dart';
 import 'memo_history_screen.dart';
-
-const _widgetChannel = MethodChannel('scribble/widget');
 
 class MemoScreen extends ConsumerStatefulWidget {
   const MemoScreen({super.key});
@@ -34,7 +29,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
     WidgetsBinding.instance.addObserver(this);
     _initNotifications();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _syncWidget();
       await _checkDueAlarms();
     });
     _alarmTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -73,41 +67,33 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkDueAlarms();
-      _syncWidget();
     }
   }
 
   Future<void> _checkDueAlarms() async {
-    final memos = await ref.read(memoServiceProvider).listActiveMemos();
     final now = DateTime.now();
-    for (final m in memos) {
-      if (!m.alarmEnabled || m.dueAt == null || m.alarmNotifiedAt != null) {
-        continue;
-      }
-      final total = m.dueAt!.difference(m.createdAt).inMinutes;
-      if (total <= 0) continue;
-      final remaining = m.dueAt!.difference(now).inMinutes;
-      final threshold = (total * 0.1).round().clamp(1, total);
-      if (remaining <= threshold) {
-        await _noti.show(
-          m.id.hashCode,
-          'Memo due soon',
-          '${m.content} (${_dueText(m.dueAt)})',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'memo_due_channel',
-              'Memo Due Alerts',
-              importance: Importance.defaultImportance,
-              priority: Priority.defaultPriority,
-            ),
+    final targets = await ref.read(memoServiceProvider).checkAlarms(now);
+    for (final memo in targets) {
+      await _noti.show(
+        memo.id.hashCode,
+        'Memo due soon',
+        '${memo.content} (${_dueText(memo.dueAt)})',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'memo_due_channel',
+            'Memo Due Alerts',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
           ),
-        );
-        await ref
-            .read(memoServiceProvider)
-            .updateMemo(m.copyWith(alarmNotifiedAt: now));
-      }
+        ),
+      );
+      await ref
+          .read(memoServiceProvider)
+          .updateMemo(memo.copyWith(alarmNotifiedAt: now));
     }
-    ref.invalidate(activeMemosProvider);
+    if (targets.isNotEmpty) {
+      ref.invalidate(activeMemosProvider);
+    }
   }
 
   String _dueText(DateTime? dueAt) {
@@ -123,26 +109,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
 
   bool _isOverdue(DateTime? dueAt) =>
       dueAt != null && dueAt.isBefore(DateTime.now());
-
-  Future<void> _syncWidget() async {
-    try {
-      final memos = await ref.read(memoServiceProvider).listActiveMemos();
-      final payload = jsonEncode(
-        memos
-            .take(25)
-            .map(
-              (m) => {
-                'id': m.id,
-                'content': m.content,
-                'urgentOrder': m.urgentOrder,
-                'dueAtEpochMs': m.dueAt?.millisecondsSinceEpoch,
-              },
-            )
-            .toList(),
-      );
-      await _widgetChannel.invokeMethod('updateMemos', {'memosJson': payload});
-    } catch (_) {}
-  }
 
   Future<void> _showAddDialog() async {
     final controller = TextEditingController();
@@ -255,7 +221,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
             alarmEnabled: result.alarmEnabled,
           );
       ref.invalidate(activeMemosProvider);
-      await _syncWidget();
     }
   }
 
@@ -268,7 +233,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
     if (updated.deleteRequested) {
       await ref.read(memoServiceProvider).deleteMemo(memo.id);
       ref.invalidate(activeMemosProvider);
-      await _syncWidget();
       return;
     }
     if (updated.content.isEmpty) return;
@@ -284,7 +248,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
           ),
         );
     ref.invalidate(activeMemosProvider);
-    await _syncWidget();
   }
 
   @override
@@ -321,7 +284,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
                   .read(memoServiceProvider)
                   .reorderActiveMemos(list.map((e) => e.id).toList());
               ref.invalidate(activeMemosProvider);
-              await _syncWidget();
             },
             itemBuilder: (context, index) {
               final memo = memos[index];
@@ -352,7 +314,6 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
                           .toggleResolved(memo.id, true);
                       ref.invalidate(activeMemosProvider);
                       ref.invalidate(resolvedMemosProvider);
-                      await _syncWidget();
                     },
                   ),
                   trailing: Row(
@@ -387,4 +348,3 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
     );
   }
 }
-

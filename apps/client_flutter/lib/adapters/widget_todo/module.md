@@ -14,7 +14,7 @@ Memo의 네이티브 홈 화면 위젯 (Android/iOS)을 담당한다.
 ## 비책임
 
 - 메모 CRUD 로직 → `memo-usecases`
-- Flutter 측 MethodChannel 호출 → `ui-memo` (호출 발신)
+- Flutter 측 MethodChannel 게이트/호출 발신 → `app-shell` (`_WidgetSyncGate`, `main.dart`)
 - 네이티브 위젯 레이아웃 → Android XML / iOS WidgetKit (별도)
 
 ## 의존 모듈
@@ -26,5 +26,5 @@ Memo의 네이티브 홈 화면 위젯 (Android/iOS)을 담당한다.
 
 ```
 widget_todo → memo_domain (타입)
-widget_todo ← ui_memo (MethodChannel 호출)
+widget_todo ← app_shell (MethodChannel 호출)
 ```

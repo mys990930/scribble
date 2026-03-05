@@ -48,4 +48,10 @@ class ApiMemoService implements MemoService {
   Future<void> reorderActiveMemos(List<String> idsInUiOrder) async {
     // TODO: PUT /api/memos/reorder
   }
+
+  @override
+  Future<List<Memo>> checkAlarms(DateTime now) async {
+    // TODO: 서버가 alarm candidate 계산을 제공하면 연동
+    return [];
+  }
 }

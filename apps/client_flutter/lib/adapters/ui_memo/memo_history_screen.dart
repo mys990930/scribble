@@ -1,11 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'memo_providers.dart';
-
-const _widgetChannel = MethodChannel('scribble/widget');
 
 class MemoHistoryScreen extends ConsumerWidget {
   const MemoHistoryScreen({super.key});
@@ -18,24 +13,6 @@ class MemoHistoryScreen extends ConsumerWidget {
     final m = abs.inMinutes % 60;
     final s = h > 0 ? '${h}h ${m}m' : '${abs.inMinutes}m';
     return diff.isNegative ? 'overdue $s' : 'due in $s';
-  }
-
-  Future<void> _syncWidget(WidgetRef ref) async {
-    final memos = await ref.read(memoServiceProvider).listActiveMemos();
-    final payload = jsonEncode(
-      memos
-          .take(25)
-          .map(
-            (m) => {
-              'id': m.id,
-              'content': m.content,
-              'urgentOrder': m.urgentOrder,
-              'dueAtEpochMs': m.dueAt?.millisecondsSinceEpoch,
-            },
-          )
-          .toList(),
-    );
-    await _widgetChannel.invokeMethod('updateMemos', {'memosJson': payload});
   }
 
   @override
@@ -71,7 +48,6 @@ class MemoHistoryScreen extends ConsumerWidget {
                         .toggleResolved(m.id, false);
                     ref.invalidate(resolvedMemosProvider);
                     ref.invalidate(activeMemosProvider);
-                    await _syncWidget(ref);
                   },
                   child: const Text('Unresolve'),
                 ),

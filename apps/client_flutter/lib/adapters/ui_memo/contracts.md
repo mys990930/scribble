@@ -4,9 +4,9 @@
 
 | Provider | 타입 | 설명 |
 |---|---|---|
-| memoRepoProvider | Provider\<MemoRepository\> | MemoRepo DI |
-| activeMemosProvider | FutureProvider\<List\<Memo\>\> | 미완료 메모 목록 |
-| resolvedMemosProvider | FutureProvider\<List\<Memo\>\> | 완료 메모 목록 |
+| memoServiceProvider | Provider<MemoService> | app_shell/di에서 re-export |
+| activeMemosProvider | FutureProvider<List<Memo>> | 미완료 메모 목록 |
+| resolvedMemosProvider | FutureProvider<List<Memo>> | 완료 메모 목록 |
 
 ## 화면
 
@@ -33,10 +33,3 @@
 | dueAt | DateTime? | 수정된 기한 |
 | alarmEnabled | bool | 알람 여부 |
 | deleteRequested | bool | 삭제 요청 (기본 false) |
-
-## MethodChannel
-
-- 채널명: `scribble/widget`
-- `updateMemos({memosJson})`: 활성 메모 JSON을 네이티브 위젯에 전달
-- `consumePendingMemo()`: 위젯에서 추가된 메모 수신
-- `consumeLaunchRoute()`: 위젯 탭으로 앱 진입 시 라우트
