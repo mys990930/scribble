@@ -80,6 +80,10 @@
 - 세션 유효: `ui-main` 진입
 - 세션 무효: `ui-auth/Login` 진입
 
+개발/테스트 모드 (Mock Auth):
+- `MockAuthService` 사용 시 백엔드 없이 로그인/복구/로그아웃 흐름 테스트 가능
+- 고정 테스트 계정으로 로그인 성공 시나리오 제공
+
 공유 브릿지 흐름:
 - OS Share Intent → `adapters/share_intent` → `ui-archive` 카테고리 선택 → `archive-usecases(HandleShare)`
 

@@ -29,9 +29,16 @@
 
 | 메서드 | 설명 |
 |---|---|
-| signIn(email, password) | 원격 로그인 |
+| signIn(email, password) | 로그인 |
 | refresh(refreshToken) | 토큰 갱신 |
-| signOut(accessToken) | 원격 로그아웃 |
+| signOut(accessToken) | 로그아웃 |
+
+## 구현체 정책
+
+- `ApiAuthService`: 실제 백엔드(`auth-session`) 연동
+- `MockAuthService`: 로컬 개발/테스트용 가짜 인증
+  - 고정 계정으로 성공 시나리오 제공
+  - 서버 없이 Auth Gate / Login / Settings(SignOut) 흐름 검증 가능
 
 ## Usecases
 

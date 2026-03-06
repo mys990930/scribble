@@ -2,12 +2,15 @@
 
 ## 목표
 
-민감한 인증 토큰/세션 정보를 안전하게 저장한다.
+플랫폼별 저장소를 통해 인증 세션을 저장한다.
+- 네이티브: secure storage
+- 웹: localStorage
 
 ## 책임
 
 - `AuthSessionStore` 구현
-- access/refresh token 암호화 저장/조회
+- 네이티브에서 access/refresh token 안전 저장/조회
+- 웹에서 localStorage 기반 세션 저장/조회
 - 로그아웃/세션 만료 시 저장 데이터 제거
 
 ## 비책임
