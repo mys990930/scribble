@@ -3,8 +3,18 @@
 ## MemoScreen
 - 빈 목록 → "No memos yet" 메시지 표시
 - 메모 3개 → 3개 카드 렌더링
-- 완료 토글 → active/resolved provider invalidate 확인
+- 완료 토글 → active/resolved provider refresh/invalidate 확인
 - 드래그 재정렬 → reorderActiveMemos 호출 확인
+
+## 초기 로딩/캐시 UX
+- 앱 최초 진입(캐시 없음) → 중앙 스피너 없이 기본 콘텐츠 영역 유지
+- 캐시 존재 상태 재진입 → 캐시 리스트 즉시 렌더
+- 백그라운드 refresh 실패 → 기존 캐시 유지 + 에러 비차단 처리
+
+## Pull-to-Refresh
+- 리스트를 아래로 당김 → activeMemosProvider.notifier.refresh() 호출
+- refresh 중에도 기존 리스트 유지
+- refresh 완료 후 최신 순서/상태 반영
 
 ## MemoEditScreen
 - 기존 content 표시 확인

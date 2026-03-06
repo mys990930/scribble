@@ -92,7 +92,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
           .updateMemo(memo.copyWith(alarmNotifiedAt: now));
     }
     if (targets.isNotEmpty) {
-      ref.invalidate(activeMemosProvider);
+      await _refreshActiveMemos();
     }
   }
 
@@ -109,6 +109,10 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
 
   bool _isOverdue(DateTime? dueAt) =>
       dueAt != null && dueAt.isBefore(DateTime.now());
+
+  Future<void> _refreshActiveMemos() async {
+    await ref.read(activeMemosProvider.notifier).refresh();
+  }
 
   Future<void> _showAddDialog() async {
     final controller = TextEditingController();
@@ -220,7 +224,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
             dueAt: result.dueAt,
             alarmEnabled: result.alarmEnabled,
           );
-      ref.invalidate(activeMemosProvider);
+      await _refreshActiveMemos();
     }
   }
 
@@ -232,7 +236,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
     if (updated == null) return;
     if (updated.deleteRequested) {
       await ref.read(memoServiceProvider).deleteMemo(memo.id);
-      ref.invalidate(activeMemosProvider);
+      await _refreshActiveMemos();
       return;
     }
     if (updated.content.isEmpty) return;
@@ -247,7 +251,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
             clearAlarmNotifiedAt: true,
           ),
         );
-    ref.invalidate(activeMemosProvider);
+    await _refreshActiveMemos();
   }
 
   @override
@@ -267,79 +271,91 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
           ),
         ],
       ),
-      body: asyncMemos.when(
-        data: (memos) {
-          if (memos.isEmpty) {
-            return const Center(child: Text('No memos yet. Tap + to add one.'));
-          }
+      body: Builder(
+        builder: (context) {
+          final memos = asyncMemos.valueOrNull ?? const <Memo>[];
 
-          return ReorderableListView.builder(
-            itemCount: memos.length,
-            onReorder: (oldIndex, newIndex) async {
-              final list = [...memos];
-              if (newIndex > oldIndex) newIndex -= 1;
-              final item = list.removeAt(oldIndex);
-              list.insert(newIndex, item);
-              await ref
-                  .read(memoServiceProvider)
-                  .reorderActiveMemos(list.map((e) => e.id).toList());
-              ref.invalidate(activeMemosProvider);
-            },
-            itemBuilder: (context, index) {
-              final memo = memos[index];
-              final overdue = _isOverdue(memo.dueAt);
-              return Card(
-                key: ValueKey(memo.id),
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: ListTile(
-                  onTap: () => _openEditor(memo),
-                  title: Text(
-                    memo.content,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+          Widget child;
+          if (memos.isEmpty) {
+            child = ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 160),
+                Center(child: Text('No memos yet. Tap + to add one.')),
+              ],
+            );
+          } else {
+            child = ReorderableListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: memos.length,
+              onReorder: (oldIndex, newIndex) async {
+                final list = [...memos];
+                if (newIndex > oldIndex) newIndex -= 1;
+                final item = list.removeAt(oldIndex);
+                list.insert(newIndex, item);
+                await ref
+                    .read(memoServiceProvider)
+                    .reorderActiveMemos(list.map((e) => e.id).toList());
+                await _refreshActiveMemos();
+              },
+              itemBuilder: (context, index) {
+                final memo = memos[index];
+                final overdue = _isOverdue(memo.dueAt);
+                return Card(
+                  key: ValueKey(memo.id),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
                   ),
-                  subtitle: Text(
-                    _dueText(memo.dueAt),
-                    style: TextStyle(
-                      color: overdue
-                          ? AppColors.overdue
-                          : AppColors.textSecondary,
+                  child: ListTile(
+                    onTap: () => _openEditor(memo),
+                    title: Text(
+                      memo.content,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      _dueText(memo.dueAt),
+                      style: TextStyle(
+                        color: overdue
+                            ? AppColors.overdue
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    leading: IconButton(
+                      icon: const Icon(Icons.check_circle_outline),
+                      onPressed: () async {
+                        await ref
+                            .read(memoServiceProvider)
+                            .toggleResolved(memo.id, true);
+                        await _refreshActiveMemos();
+                        ref.invalidate(resolvedMemosProvider);
+                      },
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          memo.alarmEnabled ? Icons.alarm_on : Icons.alarm_off,
+                          size: 18,
+                        ),
+                        ReorderableDragStartListener(
+                          index: index,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(Icons.drag_handle),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  leading: IconButton(
-                    icon: const Icon(Icons.check_circle_outline),
-                    onPressed: () async {
-                      await ref
-                          .read(memoServiceProvider)
-                          .toggleResolved(memo.id, true);
-                      ref.invalidate(activeMemosProvider);
-                      ref.invalidate(resolvedMemosProvider);
-                    },
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        memo.alarmEnabled ? Icons.alarm_on : Icons.alarm_off,
-                        size: 18,
-                      ),
+                );
+              },
+            );
+          }
 
-                      ReorderableDragStartListener(
-                        index: index,
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
+          return RefreshIndicator(onRefresh: _refreshActiveMemos, child: child);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,

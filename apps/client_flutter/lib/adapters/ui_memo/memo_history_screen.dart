@@ -47,7 +47,7 @@ class MemoHistoryScreen extends ConsumerWidget {
                         .read(memoServiceProvider)
                         .toggleResolved(m.id, false);
                     ref.invalidate(resolvedMemosProvider);
-                    ref.invalidate(activeMemosProvider);
+                    await ref.read(activeMemosProvider.notifier).refresh();
                   },
                   child: const Text('Unresolve'),
                 ),
