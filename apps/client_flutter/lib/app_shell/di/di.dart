@@ -7,11 +7,13 @@ import 'package:scribble/usecases/archive_usecases/list_recent_categories_usecas
 import 'package:scribble/usecases/archive_usecases/search_archives_usecase.dart';
 import 'package:scribble/usecases/archive_usecases/update_archive_usecase.dart';
 import 'package:scribble/usecases/archive_usecases/url_fetcher.dart';
+import 'package:scribble/usecases/auth_usecases/auth_usecase.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service.dart';
 
 import 'di_stub.dart'
     if (dart.library.io) 'di_native.dart'
-    if (dart.library.js_interop) 'di_web.dart' as platform;
+    if (dart.library.js_interop) 'di_web.dart'
+    as platform;
 
 final memoServiceProvider = Provider<MemoService>((ref) {
   return platform.createMemoService(ref);
@@ -69,3 +71,7 @@ final updateArchiveUseCaseProvider = Provider<UpdateArchiveUseCase>((ref) {
 final selectedArchiveCategoryProvider = StateProvider<String?>((ref) => null);
 final archiveSearchQueryProvider = StateProvider<String>((ref) => '');
 final lastUsedArchiveCategoryProvider = StateProvider<String>((ref) => 'inbox');
+
+final authUsecaseProvider = Provider<AuthUsecase>((ref) {
+  return platform.createAuthUsecase(ref);
+});

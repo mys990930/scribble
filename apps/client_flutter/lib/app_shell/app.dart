@@ -6,16 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:scribble/domain/memo_domain/memo.dart';
 import 'package:scribble/adapters/ui_archive/archive_screen.dart';
+import 'package:scribble/adapters/ui_auth/ui_auth.dart';
+import 'package:scribble/adapters/ui_main/ui_main.dart';
 import 'package:scribble/adapters/ui_memo/memo_providers.dart';
 import 'package:scribble/adapters/ui_memo/memo_screen.dart';
+import 'package:scribble/adapters/ui_settings/ui_settings.dart';
+import 'package:scribble/domain/memo_domain/memo.dart';
 import 'package:scribble/shared/ui/app_theme.dart';
 import 'routes.dart';
 
 class MyApp extends StatelessWidget {
-  final String? initialRoute;
-  const MyApp({super.key, this.initialRoute});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +25,15 @@ class MyApp extends StatelessWidget {
       title: 'Scribble',
       debugShowCheckedModeBanner: false,
       theme: dotsTheme,
-      initialRoute: initialRoute ?? Routes.memo,
+      initialRoute: Routes.authGate,
       routes: {
+        Routes.authGate: (_) => const AuthGateScreen(),
+        Routes.login: (_) => const LoginScreen(),
+        Routes.main: (_) => const MainScreen(),
         Routes.home: (_) => const MemoScreen(),
         Routes.memo: (_) => const MemoScreen(),
         Routes.archive: (_) => const ArchiveScreen(),
+        Routes.settings: (_) => const SettingsScreen(),
       },
       builder: (context, child) =>
           _WidgetSyncGate(child: child ?? const SizedBox.shrink()),
@@ -82,7 +88,9 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
 
   Future<void> _consumePendingWidgetMemo() async {
     try {
-      final raw = await _widgetChannel.invokeMethod<String>('consumePendingMemo');
+      final raw = await _widgetChannel.invokeMethod<String>(
+        'consumePendingMemo',
+      );
       if (raw == null || raw.trim().isEmpty) return;
 
       String text = raw;
@@ -108,10 +116,9 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
         'consumePendingShare',
       );
       if (raw == null || raw.isEmpty || !mounted) return;
-      Navigator.of(context).pushNamed(
-        Routes.archive,
-        arguments: {'pendingShare': raw},
-      );
+      Navigator.of(
+        context,
+      ).pushNamed(Routes.archive, arguments: {'pendingShare': raw});
     } catch (_) {}
   }
 
@@ -126,12 +133,14 @@ class _WidgetSyncGateState extends ConsumerState<_WidgetSyncGate>
     final payload = jsonEncode(
       memos
           .take(25)
-          .map((m) => {
-                'id': m.id,
-                'content': m.content,
-                'urgentOrder': m.urgentOrder,
-                'dueAtEpochMs': m.dueAt?.millisecondsSinceEpoch,
-              })
+          .map(
+            (m) => {
+              'id': m.id,
+              'content': m.content,
+              'urgentOrder': m.urgentOrder,
+              'dueAtEpochMs': m.dueAt?.millisecondsSinceEpoch,
+            },
+          )
           .toList(),
     );
     await _widgetChannel.invokeMethod('updateMemos', {'memosJson': payload});
