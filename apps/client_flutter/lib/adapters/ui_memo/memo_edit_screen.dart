@@ -120,10 +120,31 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                       _dueAt = null;
                     }),
                   ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Hours'),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                children: [
                   ChoiceChip(
                     label: const Text('1h'),
                     selected: _selectedPreset == const Duration(hours: 1),
                     onSelected: (_) => _togglePreset(const Duration(hours: 1)),
+                  ),
+                  ChoiceChip(
+                    label: const Text('2h'),
+                    selected: _selectedPreset == const Duration(hours: 2),
+                    onSelected: (_) => _togglePreset(const Duration(hours: 2)),
+                  ),
+                  ChoiceChip(
+                    label: const Text('3h'),
+                    selected: _selectedPreset == const Duration(hours: 3),
+                    onSelected: (_) => _togglePreset(const Duration(hours: 3)),
                   ),
                   ChoiceChip(
                     label: const Text('6h'),
@@ -135,10 +156,31 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                     selected: _selectedPreset == const Duration(hours: 12),
                     onSelected: (_) => _togglePreset(const Duration(hours: 12)),
                   ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Days / Weeks'),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                children: [
                   ChoiceChip(
                     label: const Text('1d'),
                     selected: _selectedPreset == const Duration(days: 1),
                     onSelected: (_) => _togglePreset(const Duration(days: 1)),
+                  ),
+                  ChoiceChip(
+                    label: const Text('3d'),
+                    selected: _selectedPreset == const Duration(days: 3),
+                    onSelected: (_) => _togglePreset(const Duration(days: 3)),
+                  ),
+                  ChoiceChip(
+                    label: const Text('1w'),
+                    selected: _selectedPreset == const Duration(days: 7),
+                    onSelected: (_) => _togglePreset(const Duration(days: 7)),
                   ),
                 ],
               ),

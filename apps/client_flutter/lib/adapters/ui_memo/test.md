@@ -4,6 +4,7 @@
 - 빈 목록 → "No memos yet" 메시지 표시
 - 메모 3개 → 3개 카드 렌더링
 - 완료 토글 → active/resolved provider refresh/invalidate 확인
+- 알람 아이콘 탭 → alarmEnabled 토글 + active 리스트 refresh
 - 드래그 재정렬 → reorderActiveMemos 호출 확인
 
 ## 초기 로딩/캐시 UX
@@ -18,8 +19,9 @@
 
 ## MemoEditScreen
 - 기존 content 표시 확인
-- 기한 프리셋 1h 선택 → dueAt ≈ now+1h
-- 프리셋 재선택(토글 해제) → dueAt null
+- 기한 프리셋 1h/2h/3h/6h/12h 선택 → dueAt 반영
+- 기한 프리셋 1d/3d/1w 선택 → dueAt 반영
+- No due 선택 후 Save → dueAt null 반영
 - 커스텀 시간 입력 → dueAt 반영
 - 삭제 버튼 → deleteRequested=true 반환
 - Save → MemoEditResult 반환

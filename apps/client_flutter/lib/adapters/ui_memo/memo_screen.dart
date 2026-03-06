@@ -149,35 +149,66 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
                     decoration: const InputDecoration(hintText: 'Write memo'),
                   ),
                   const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        ChoiceChip(
-                          label: const Text('1h'),
-                          selected: selectedPreset == const Duration(hours: 1),
-                          onSelected: (_) => toggle(const Duration(hours: 1)),
-                        ),
-                        const SizedBox(width: 6),
-                        ChoiceChip(
-                          label: const Text('6h'),
-                          selected: selectedPreset == const Duration(hours: 6),
-                          onSelected: (_) => toggle(const Duration(hours: 6)),
-                        ),
-                        const SizedBox(width: 6),
-                        ChoiceChip(
-                          label: const Text('12h'),
-                          selected: selectedPreset == const Duration(hours: 12),
-                          onSelected: (_) => toggle(const Duration(hours: 12)),
-                        ),
-                        const SizedBox(width: 6),
-                        ChoiceChip(
-                          label: const Text('1d'),
-                          selected: selectedPreset == const Duration(days: 1),
-                          onSelected: (_) => toggle(const Duration(days: 1)),
-                        ),
-                      ],
-                    ),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Hours'),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('1h'),
+                        selected: selectedPreset == const Duration(hours: 1),
+                        onSelected: (_) => toggle(const Duration(hours: 1)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('2h'),
+                        selected: selectedPreset == const Duration(hours: 2),
+                        onSelected: (_) => toggle(const Duration(hours: 2)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('3h'),
+                        selected: selectedPreset == const Duration(hours: 3),
+                        onSelected: (_) => toggle(const Duration(hours: 3)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('6h'),
+                        selected: selectedPreset == const Duration(hours: 6),
+                        onSelected: (_) => toggle(const Duration(hours: 6)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('12h'),
+                        selected: selectedPreset == const Duration(hours: 12),
+                        onSelected: (_) => toggle(const Duration(hours: 12)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Days / Weeks'),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('1d'),
+                        selected: selectedPreset == const Duration(days: 1),
+                        onSelected: (_) => toggle(const Duration(days: 1)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('3d'),
+                        selected: selectedPreset == const Duration(days: 3),
+                        onSelected: (_) => toggle(const Duration(days: 3)),
+                      ),
+                      ChoiceChip(
+                        label: const Text('1w'),
+                        selected: selectedPreset == const Duration(days: 7),
+                        onSelected: (_) => toggle(const Duration(days: 7)),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -247,6 +278,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
           memo.copyWith(
             content: updated.content,
             dueAt: updated.dueAt,
+            clearDueAt: updated.dueAt == null,
             alarmEnabled: updated.alarmEnabled,
             clearAlarmNotifiedAt: true,
           ),
@@ -335,9 +367,24 @@ class _MemoScreenState extends ConsumerState<MemoScreen>
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          memo.alarmEnabled ? Icons.alarm_on : Icons.alarm_off,
-                          size: 18,
+                        IconButton(
+                          icon: Icon(
+                            memo.alarmEnabled
+                                ? Icons.alarm_on
+                                : Icons.alarm_off,
+                            size: 18,
+                          ),
+                          onPressed: () async {
+                            await ref
+                                .read(memoServiceProvider)
+                                .updateMemo(
+                                  memo.copyWith(
+                                    alarmEnabled: !memo.alarmEnabled,
+                                    clearAlarmNotifiedAt: true,
+                                  ),
+                                );
+                            await _refreshActiveMemos();
+                          },
                         ),
                         ReorderableDragStartListener(
                           index: index,

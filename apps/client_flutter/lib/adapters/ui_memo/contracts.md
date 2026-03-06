@@ -20,7 +20,7 @@
 ### MemoScreen
 - 입력: 없음
 - 출력: 활성 메모 리스트 (ReorderableListView)
-- 액션: 추가(dialog), 완료 토글, 드래그 재정렬, 편집 화면 이동, 히스토리 화면 이동, 아래로 당겨 새로고침
+- 액션: 추가(dialog), 완료 토글, 알람 아이콘 토글, 드래그 재정렬, 편집 화면 이동, 히스토리 화면 이동, 아래로 당겨 새로고침
 - 로딩 UX:
   - 최초 로딩 시 스피너 대신 콘텐츠 영역 유지(빈 상태/기존 캐시 우선)
   - 새로고침 시 기존 리스트 유지 + RefreshIndicator 표시
@@ -28,7 +28,7 @@
 ### MemoEditScreen
 - 입력: Memo
 - 출력: MemoEditResult (content, dueAt, alarmEnabled, deleteRequested)
-- 액션: 저장, 삭제, 기한 변경, 알람 토글
+- 액션: 저장, 삭제, 기한 변경(시간/일-주 그룹 프리셋 + 커스텀), 알람 토글
 
 ### MemoHistoryScreen
 - 입력: 없음

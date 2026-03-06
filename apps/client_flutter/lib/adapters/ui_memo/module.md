@@ -6,8 +6,8 @@ Memo 기능의 Flutter 화면과 상태 관리를 담당한다.
 
 ## 책임
 
-- MemoScreen: 활성 메모 목록, 드래그 재정렬, 완료 토글, 당겨서 새로고침(Pull-to-Refresh)
-- MemoEditScreen: 메모 편집, 기한 프리셋(1h/6h/12h/1d/커스텀), 알람 토글, 삭제
+- MemoScreen: 활성 메모 목록, 드래그 재정렬, 완료 토글, 알람 아이콘 토글, 당겨서 새로고침(Pull-to-Refresh)
+- MemoEditScreen: 메모 편집, 기한 프리셋(1h/2h/3h/6h/12h/1d/3d/1w + 커스텀), 알람 토글, 삭제
 - MemoHistoryScreen: 완료 메모 목록, 복원
 - 메모 관련 Riverpod provider 정의 (`activeMemosProvider`, `resolvedMemosProvider`)
 - 활성 메모 캐시 유지 + 백그라운드 refresh 상태 관리 (초기/갱신 UX 분리)
