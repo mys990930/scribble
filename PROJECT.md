@@ -77,8 +77,8 @@
 
 - 웹에서는 SQLite(dart:ffi) 사용 불가 → **서버 API 직접 호출**로 fallback
 - `app_shell/di/`에서 조건부 import(`dart.library.io` / `dart.library.js_interop`)로 컴파일 타임 분기
-- 네이티브: `DriftMemoService` (SQLite, offline-first)
-- 웹: `ApiMemoService` (HTTP, 서버 의존)
+- 네이티브: `MemoServiceImpl + DriftMemoRepository` (SQLite, offline-first)
+- 웹: `MemoServiceImpl + ApiMemoRepository` (HTTP, 서버 의존)
 - UI 코드는 `MemoService` 인터페이스만 참조하므로 플랫폼 차이를 인지하지 않음
 - MethodChannel 기반 위젯 동기화도 `kIsWeb` 가드로 웹에서 비활성
 
@@ -132,6 +132,11 @@
 
 ## 4.2 Usecase / Orchestration
 
+- `auth-usecases`
+  - 로그인/로그아웃, 세션 복구(restore), 인증 상태(AuthState) 제공
+  - 토큰/세션 저장소 인터페이스(`AuthSessionStore`) 추상화
+- `settings-usecases`
+  - 앱 설정 조회/저장(알림, 동기화 정책, 사용자 환경설정)
 - `dailyplan-usecases`
   - 템플릿 관리, 오늘 플랜 생성/편집
 - `calendar-usecases`
@@ -148,7 +153,10 @@
 ## 4.3 Platform Adapters
 
 ### Client
-- `app-shell` — 앱 진입점, 라우팅, DI
+- `app-shell` — 앱 진입점, 라우팅, DI, auth gate 라우트 분기
+- `ui-main` — 앱 메인 허브 화면 (기능 진입 포털)
+- `ui-auth` — 로그인/세션 복구/재인증 화면
+- `ui-settings` — 설정 화면
 - `ui-dailyplan`
 - `ui-calendar`
 - `ui-memo`
@@ -159,6 +167,7 @@
 - `widget-calendar`
 - `widget-dailyplan`
 - `storage-sqlite`
+- `secure-storage` — 토큰/세션 안전 저장 adapter
 - `api-client`
 
 ### Backend
@@ -173,12 +182,14 @@
 
 ## 5) 사용자 플로우 (E2E)
 
-1. 로그인/디바이스 등록 → 초기 데이터 동기화
-2. 요일 템플릿 설정 → 오늘 Daily Plan 인스턴스 생성
-3. Routine 실행 상태는 시간 자동 판정, 진행률 계산
-4. Memo 캡처 → 필요 시 Calendar 일정 또는 Note로 전송
-5. 외부 앱 공유 → 카테고리 선택 → Archive 저장(수집/폴백) → 필요 시 Note로 전송
-6. 모든 변경은 로컬 저장 후 Sync 모듈이 멀티디바이스 반영
+1. 앱 시작 → Auth Gate에서 세션 복구 시도
+2. 세션 유효 시 메인 허브 진입, 무효 시 로그인 화면으로 이동
+3. 로그인/디바이스 등록 완료 → 초기 데이터 동기화
+4. 요일 템플릿 설정 → 오늘 Daily Plan 인스턴스 생성
+5. Routine 실행 상태는 시간 자동 판정, 진행률 계산
+6. Memo 캡처 → 필요 시 Calendar 일정 또는 Note로 전송
+7. 외부 앱 공유 → 카테고리 선택 → Archive 저장(수집/폴백) → 필요 시 Note로 전송
+8. 모든 변경은 로컬 저장 후 Sync 모듈이 멀티디바이스 반영
 
 ---
 
@@ -230,7 +241,7 @@
 
 v1에서 아래 기능은 모두 포함한다.
 
-- Daily Plan / Calendar / Memo / Note / Archive
+- Auth Gate + Login + Main + Settings + Daily Plan / Calendar / Memo / Note / Archive
 - 기능별 위젯(Todo, Calendar, DailyPlan)
 - 멀티플랫폼 클라이언트 + 백엔드 동기화
 - 모듈 3문서(`module.md`, `contracts.md`, `test.md`) 의무화
