@@ -1,14 +1,16 @@
-# device-registry test
+# device_registry test
 
-## register
-- 정상 → 201
-- 중복 deviceId → DEVICE_ALREADY_REGISTERED
-- 디바이스 5대 초과 → DEVICE_LIMIT_EXCEEDED
+## 성공 케이스
 
-## list
-- 등록 디바이스 3대 → 3개 반환
-- 0대 → 빈 배열
+- 인증된 사용자는 새 디바이스를 등록할 수 있다.
+- 사용자는 자신의 디바이스 목록만 볼 수 있다.
+- 활성 디바이스는 sync 요청 전에 유효성 검증을 통과한다.
+- sync 성공 후 `last_sync_at`이 갱신된다.
+- 사용자는 자신의 디바이스를 해제할 수 있다.
 
-## delete
-- 존재하는 디바이스 → 삭제 성공
-- 존재하지 않는 → DEVICE_NOT_FOUND
+## 실패 케이스
+
+- 인증 없이 디바이스를 등록할 수 없다.
+- 사용자별 최대 디바이스 수를 초과할 수 없다.
+- 다른 사용자의 디바이스를 해제할 수 없다.
+- 해제된 디바이스는 sync 검증을 통과할 수 없다.

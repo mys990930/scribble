@@ -1,16 +1,19 @@
-# sync-api test
+# sync_api test
 
-## push
-- 정상 이벤트 3개 → accepted=3
-- 미등록 deviceId → SYNC_INVALID_DEVICE
-- LWW 충돌 → 서버 최신 우선, accepted
+## 성공 케이스
 
-## pull
-- 커서 이후 변경 2건 → 2건 반환 + 새 커서
-- 변경 없음 → 빈 changes + 동일 커서
-- 커서 만료 → SYNC_CURSOR_EXPIRED
+- 유효한 사용자와 디바이스는 push 요청을 보낼 수 있다.
+- pull은 cursor 이후 이벤트만 반환한다.
+- 동일 `event_id` 재전송은 멱등하게 처리된다.
+- 서로 다른 디바이스에서 생성된 변경이 pull로 전파된다.
+- tombstone 이벤트가 다른 디바이스로 전달된다.
+- sync 완료 후 디바이스의 `last_sync_at`이 갱신된다.
 
-## 경계 케이스
-- 동일 엔티티 push 2회 → LWW로 최신만 유지
-- tombstone 포함 pull → isTombstone=true 전달
-- 자기 디바이스 변경 → pull에서 제외
+## 실패 케이스
+
+- 인증 없이 sync 엔드포인트를 호출할 수 없다.
+- 비활성 디바이스는 push/pull을 수행할 수 없다.
+- 변조된 cursor는 거부된다.
+- 만료된 cursor는 `CURSOR_EXPIRED`를 반환한다.
+- 필수 필드가 없는 이벤트는 수락되지 않는다.
+- 오래된 `updated_at` 이벤트는 LWW 규칙상 현재 상태를 덮어쓰지 못한다.
