@@ -10,6 +10,8 @@
 - 빈 응답 → 빈 changes + 커서
 
 ## 인증
+- 로그인 401 → API_UNAUTHORIZED
+- refresh 401 → API_UNAUTHORIZED
 - 토큰 만료 → 자동 refresh 시도
 - refresh 실패 → API_UNAUTHORIZED
 

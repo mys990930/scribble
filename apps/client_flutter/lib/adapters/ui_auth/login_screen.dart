@@ -40,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       Navigator.of(context).pushReplacementNamed(Routes.main);
     } catch (e) {
       setState(() {
-        _error = 'Login failed. Try test@scribble.app / 1234';
+        _error = 'Login failed. Check your account or server connection.';
       });
     } finally {
       if (mounted) {

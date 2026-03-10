@@ -47,3 +47,7 @@
 | RestoreSession | — | AuthState |
 | SignIn | email, password | AuthState |
 | SignOut | — | void |
+
+추가 계약:
+- `SignIn` 성공 후 네이티브에서는 현재 설치의 디바이스 등록 bootstrap을 수행할 수 있다.
+- 디바이스 등록 bootstrap 실패 시 로그인 자체는 실패로 처리한다.

@@ -4,6 +4,7 @@ from typing import Annotated
 import jwt
 from fastapi import Depends, Header
 
+from auth_session.errors import token_expired, token_invalid
 from core.config import get_settings
 from core.errors import AppError
 
@@ -37,16 +38,18 @@ def get_current_user(authorization: Annotated[str | None, Header()] = None) -> A
 
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    except jwt.ExpiredSignatureError as exc:
+        raise token_expired() from exc
     except jwt.PyJWTError as exc:
-        raise AppError(code='UNAUTHORIZED', message='Invalid or expired token', status_code=401) from exc
+        raise token_invalid() from exc
 
     user_id = payload.get('sub')
     session_id = payload.get('sid')
     token_type = payload.get('type')
-    if not user_id or token_type != 'access':
-        raise AppError(code='UNAUTHORIZED', message='Invalid access token', status_code=401)
+    if not user_id or token_type != 'access' or not session_id:
+        raise token_invalid()
 
-    return AuthContext(user_id=str(user_id), session_id=str(session_id) if session_id else None)
+    return AuthContext(user_id=str(user_id), session_id=str(session_id))
 
 
 def get_current_session(current_user: Annotated[AuthContext, Depends(get_current_user)]) -> AuthContext:

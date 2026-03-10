@@ -70,6 +70,13 @@ Scribble의 데이터 SoT는 기본적으로 클라이언트 로컬 DB(SQLite)�
 - 모든 시각 필드는 UTC 기준 `timestamptz`로 저장한다.
 - migration은 Alembic으로만 관리하고 수동 SQL drift를 허용하지 않는다.
 
+### 4.4 배포 가정
+
+- `backend_api`는 독립 Docker 이미지로 배포 가능해야 한다.
+- 기본 컨테이너 포트는 `8888`이다.
+- NAS 배포 기준으로 `backend`와 `postgres`를 분리한 compose 구성을 기본 제공한다.
+- 부팅 시 `alembic upgrade head`를 먼저 수행한 뒤 FastAPI를 기동한다.
+
 ---
 
 ## 5) 아키텍처 원칙
@@ -239,6 +246,10 @@ graph TD
 ```text
 apps/backend_api/
 ├── PROJECT.md
+├── DEPLOY.md
+├── Dockerfile
+├── compose.yaml
+├── .env.example
 ├── pyproject.toml
 ├── uv.lock
 ├── alembic.ini

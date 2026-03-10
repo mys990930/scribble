@@ -1,7 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scribble/adapters/api_client/api_auth_service.dart';
+import 'package:scribble/adapters/api_client/api_device_registry_service.dart';
 import 'package:scribble/adapters/api_client/mock_auth_service.dart';
-import 'package:scribble/adapters/secure_storage/local_storage_auth_session_store.dart';
+import 'package:scribble/adapters/secure_storage/device_installation_store.dart';
+import 'package:scribble/adapters/secure_storage/secure_auth_session_store.dart';
 import 'package:scribble/adapters/share_intent/method_channel_share_intent_adapter.dart';
 import 'package:scribble/adapters/share_intent/share_intent_adapter.dart';
 import 'package:scribble/adapters/storage_sqlite/drift_archive_repo.dart';
@@ -18,6 +21,9 @@ import 'package:scribble/usecases/auth_usecases/auth_usecase.dart';
 import 'package:scribble/usecases/auth_usecases/auth_usecase_impl.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service_impl.dart';
+
+const _useRealAuth = bool.fromEnvironment('SCRIBBLE_USE_REAL_AUTH');
+const _apiBaseUrl = String.fromEnvironment('SCRIBBLE_API_BASE_URL');
 
 final _databaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
 
@@ -54,15 +60,34 @@ ShareIntentAdapter createShareIntentAdapter(
   );
 }
 
-// Auth providers
 AuthSessionStore createAuthSessionStore(Ref ref) {
-  // TODO: Replace with SecureAuthSessionStore when flutter_secure_storage is added
-  return LocalStorageAuthSessionStore();
+  return SecureAuthSessionStore();
+}
+
+DeviceInstallationStore createDeviceInstallationStore(Ref ref) {
+  return SecureDeviceInstallationStore();
+}
+
+ApiDeviceRegistryService createDeviceRegistryService(Ref ref) {
+  if (_apiBaseUrl.isEmpty) {
+    throw StateError('SCRIBBLE_API_BASE_URL is required when SCRIBBLE_USE_REAL_AUTH=true');
+  }
+
+  return ApiDeviceRegistryService(
+    baseUrl: _apiBaseUrl,
+    metadataProvider: AndroidDeviceRegistrationMetadataProvider(
+      deviceInstallationStore: createDeviceInstallationStore(ref),
+    ),
+  );
 }
 
 AuthService createAuthService(Ref ref) {
-  // Use MockAuthService for development/testing
-  // Change to ApiAuthService for production with real backend
+  if (_useRealAuth) {
+    if (_apiBaseUrl.isEmpty) {
+      throw StateError('SCRIBBLE_API_BASE_URL is required when SCRIBBLE_USE_REAL_AUTH=true');
+    }
+    return ApiAuthService(baseUrl: _apiBaseUrl);
+  }
   return MockAuthService();
 }
 
@@ -70,5 +95,8 @@ AuthUsecase createAuthUsecase(Ref ref) {
   return AuthUsecaseImpl(
     authService: createAuthService(ref),
     sessionStore: createAuthSessionStore(ref),
+    afterSignIn: _useRealAuth
+        ? (session) => createDeviceRegistryService(ref).registerCurrentDevice(session: session)
+        : null,
   );
 }

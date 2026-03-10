@@ -11,12 +11,15 @@
 - 현재 인증 상태(AuthState) 제공
 - 토큰/세션 저장 인터페이스(`AuthSessionStore`) 정의
 - 원격 인증 인터페이스(`AuthService`) 정의
+- 네이티브에서 로그인 성공 직후 후속 bootstrap 훅 실행
+  - 현재 구현: 디바이스 등록 bootstrap
 
 ## 비책임
 
 - 로그인 화면 UI → `ui-auth`
 - 토큰 실제 저장 구현 → `secure-storage` / 웹 저장소 adapter
 - HTTP 인증 API 호출 구현 → `api-client`
+- 디바이스 등록 HTTP 호출 구현 자체 → `api-client`
 - 라우팅 분기 → `app-shell`
 
 ## 의존 모듈

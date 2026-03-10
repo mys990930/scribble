@@ -11,6 +11,10 @@
 - ProviderScope (Riverpod DI 루트)
 - 플랫폼 조걶부 DI (`di/` — 네이티브: SQLite/secure-storage, 웹: API/web-storage)
 - **Auth Gate 라우트**: `/auth-gate` 초기 진입, 세션 복구 후 `/main` 또는 `/auth/login` 분기
+- 네이티브 로그인 경로에서 auth + device bootstrap wiring
+  - `SecureAuthSessionStore`
+  - `SecureDeviceInstallationStore`
+  - `ApiDeviceRegistryService`
 - 위젯 동기화 게이트 (`_WidgetSyncGate`) — 네이티브 전용, 웹에서 비활성
 - 앱 resume 시 pending memo consume + widget sync 트리거
 - 앱 시작 시 pending share 확인 및 ui-archive 공유 플로우 전달
@@ -23,7 +27,7 @@
 
 ## 조걶부 DI 구조
 
-```
+```text
 app_shell/di/
   di.dart        ← 진입점 (조걶부 import)
   di_native.dart ← dart.library.io → MemoServiceImpl, AuthUsecase, SecureStorage
@@ -32,12 +36,20 @@ app_shell/di/
 ```
 
 AuthService 구현체 선택:
-- `ApiAuthService` (백엔드 연동)
-- `MockAuthService` (로컬 개발/테스트용, compile-time flag로 전환)
+- 기본값: `MockAuthService` (로컬 개발/테스트용)
+- 실제 백엔드 연동 시: `ApiAuthService(baseUrl: ...)`
+- 전환 지점: `app_shell/di/di_native.dart`, `app_shell/di/di_web.dart`
+
+네이티브 실백엔드 경로:
+- `ApiAuthService`로 로그인
+- `SecureAuthSessionStore`에 세션 저장
+- `SecureDeviceInstallationStore`에서 `device.id` 조회/생성
+- `ApiDeviceRegistryService`로 `/devices` 등록
+- 성공 시 `/main` 이동
 
 ## 의존 방향
 
-```
+```text
 app_shell → ui_*, shared/ui, shared/kernel
 app_shell → storage_sqlite (네이티브만, di_native.dart)
 app_shell → api_client (웹만, di_web.dart)

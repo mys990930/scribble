@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, String, Text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, String, Text, func
 from sqlalchemy.dialects.postgresql import INET, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -47,7 +47,11 @@ class Device(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     app_version: Mapped[str | None] = mapped_column(String(40), nullable=True)
     last_ip: Mapped[str | None] = mapped_column(INET, nullable=True)
     last_user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
-    registered_at: Mapped[datetime] = mapped_column(nullable=False)
-    last_seen_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    last_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    deactivated_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    registered_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

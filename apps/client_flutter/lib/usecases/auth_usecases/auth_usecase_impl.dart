@@ -1,4 +1,5 @@
 import 'auth_service.dart';
+import 'auth_session.dart';
 import 'auth_session_store.dart';
 import 'auth_state.dart';
 import 'auth_usecase.dart';
@@ -6,8 +7,13 @@ import 'auth_usecase.dart';
 class AuthUsecaseImpl implements AuthUsecase {
   final AuthService authService;
   final AuthSessionStore sessionStore;
+  final Future<void> Function(AuthSession session)? afterSignIn;
 
-  AuthUsecaseImpl({required this.authService, required this.sessionStore});
+  AuthUsecaseImpl({
+    required this.authService,
+    required this.sessionStore,
+    this.afterSignIn,
+  });
 
   @override
   Future<AuthState> restoreSession() async {
@@ -35,6 +41,12 @@ class AuthUsecaseImpl implements AuthUsecase {
   }) async {
     final session = await authService.signIn(email: email, password: password);
     await sessionStore.save(session);
+    try {
+      await afterSignIn?.call(session);
+    } catch (_) {
+      await sessionStore.clear();
+      rethrow;
+    }
     return AuthState.authenticated;
   }
 

@@ -1,20 +1,23 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
 class SyncEventEnvelope(BaseModel):
-    event_id: str
+    event_id: UUID
     entity_type: str = Field(min_length=1, max_length=40)
-    entity_id: str
+    entity_id: UUID
     operation: str = Field(pattern='^(upsert|delete)$')
-    payload: dict
+    payload: dict[str, Any]
     updated_at: datetime
     deleted_at: datetime | None = None
 
 
 class PushRequest(BaseModel):
-    device_id: str = Field(min_length=1, max_length=128)
     events: list[SyncEventEnvelope]
 
 

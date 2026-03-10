@@ -8,6 +8,7 @@
 
 - AuthGateScreen: 앱 시작 시 세션 복구 상태 표시 및 분기
 - LoginScreen: 사용자 인증 입력/요청
+- 로그인 성공 후 네이티브 device bootstrap 결과에 따라 메인 진입/에러 표시
 - 세션 만료 시 재로그인 UX 제공
 
 ## 비책임

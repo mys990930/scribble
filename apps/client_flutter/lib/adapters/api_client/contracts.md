@@ -16,10 +16,19 @@
 
 ## 동기화 엔드포인트 (네이티브용)
 
+모든 sync 요청은 아래 헤더를 포함한다.
+
+- `Authorization: Bearer <access_token>`
+- `X-Device-Id: <deviceId>`
+
 | 메서드 | 경로 | 설명 |
 |---|---|---|
 | POST | /auth/login | 로그인 |
 | POST | /auth/refresh | 토큰 갱신 |
-| POST | /devices/register | 디바이스 등록 |
+| POST | /devices | 디바이스 등록 |
 | POST | /sync/push | 로컬 변경 전송 |
-| POST | /sync/pull | 서버 변경 수신 |
+| GET | /sync/pull | 서버 변경 수신 |
+
+네이티브 흐름:
+- 로그인 성공 후 `/devices` 등록을 먼저 수행한다.
+- sync 요청은 등록된 활성 디바이스 컨텍스트를 전제로 한다.

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scribble/adapters/api_client/api_auth_service.dart';
 import 'package:scribble/adapters/api_client/api_memo_repository.dart';
 import 'package:scribble/adapters/api_client/mock_auth_service.dart';
 import 'package:scribble/adapters/secure_storage/local_storage_auth_session_store.dart';
@@ -16,6 +17,9 @@ import 'package:scribble/usecases/auth_usecases/auth_usecase.dart';
 import 'package:scribble/usecases/auth_usecases/auth_usecase_impl.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service.dart';
 import 'package:scribble/usecases/memo_usecases/memo_service_impl.dart';
+
+const _useRealAuth = bool.fromEnvironment('SCRIBBLE_USE_REAL_AUTH');
+const _apiBaseUrl = String.fromEnvironment('SCRIBBLE_API_BASE_URL');
 
 MemoService createMemoService(Ref ref) {
   return MemoServiceImpl(
@@ -55,12 +59,17 @@ class _UnsupportedShareIntentAdapter implements ShareIntentAdapter {
   }
 }
 
-// Auth providers
 AuthSessionStore createAuthSessionStore(Ref ref) {
   return LocalStorageAuthSessionStore();
 }
 
 AuthService createAuthService(Ref ref) {
+  if (_useRealAuth) {
+    if (_apiBaseUrl.isEmpty) {
+      throw StateError('SCRIBBLE_API_BASE_URL is required when SCRIBBLE_USE_REAL_AUTH=true');
+    }
+    return ApiAuthService(baseUrl: _apiBaseUrl);
+  }
   return MockAuthService();
 }
 

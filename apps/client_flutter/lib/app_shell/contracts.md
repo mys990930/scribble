@@ -14,6 +14,7 @@
 Auth Gate 분기:
 - 세션 유효: `/main` 이동
 - 세션 무효: `/auth/login` 이동
+- 로그인 성공 후 네이티브는 디바이스 등록 bootstrap을 수행한 뒤 `/main`으로 이동한다
 
 ## DI (app_shell/di/)
 
@@ -26,8 +27,11 @@ Auth Gate 분기:
 - 타입: `Provider<AuthUsecase>`
 - 네이티브/웹: `AuthUsecaseImpl(AuthService, AuthSessionStore)`
 - AuthService 구현체:
-  - `ApiAuthService` (실제 백엔드)
-  - `MockAuthService` (로컬 개발/테스트용)
+  - 기본값: `MockAuthService` (로컬 개발/테스트용)
+  - 실백엔드: `ApiAuthService`
+- compile-time switch:
+  - `SCRIBBLE_USE_REAL_AUTH=true`
+  - `SCRIBBLE_API_BASE_URL=http://127.0.0.1:8000`
 
 ### authSessionStoreProvider
 - 타입: `Provider<AuthSessionStore>`

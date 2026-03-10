@@ -2,6 +2,11 @@
 
 ## 엔드포인트
 
+모든 sync 요청은 아래 헤더를 공통으로 포함한다.
+
+- `Authorization: Bearer <access_token>`
+- `X-Device-Id: <client-generated-device-id>`
+
 ### `POST /sync/push`
 
 클라이언트가 로컬 outbox 이벤트를 업로드한다.
@@ -10,7 +15,6 @@ Request:
 
 ```json
 {
-  "device_id": "client-generated-id",
   "events": [
     {
       "event_id": "uuid",
@@ -35,7 +39,7 @@ Response `200`:
 }
 ```
 
-### `GET /sync/pull?device_id=...&cursor=...`
+### `GET /sync/pull?cursor=...`
 
 cursor 이후 변경 이벤트를 반환한다.
 
@@ -110,7 +114,9 @@ LWW 판정 규칙:
 ## 동작 계약
 
 - push 전에 인증과 device 유효성 검증을 수행한다.
-- 중복 `event_id`는 멱등하게 처리한다.
+- sync 요청의 디바이스 식별은 body/query가 아니라 `X-Device-Id` 헤더에서 읽는다.
+- 중복 `event_id`는 멱등하게 `accepted`로 처리한다.
+- stale 이벤트도 append-only 저장소에는 기록하되, LWW 결과에는 반영하지 않는다.
 - pull은 요청한 사용자 자신의 이벤트만 반환한다.
 - 자기 자신이 방금 보낸 이벤트도 다른 디바이스 관점에서는 pull 대상이 된다.
 - 현재 요청 디바이스가 직전에 push한 이벤트를 같은 디바이스에 다시 내려줄지 여부는 서비스 정책으로 결정하되, v1 기본값은 `포함`이다.

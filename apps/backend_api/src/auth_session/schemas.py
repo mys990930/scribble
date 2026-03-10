@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -20,7 +22,7 @@ class RefreshRequest(BaseModel):
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: UUID
     email: EmailStr
 
 
@@ -31,7 +33,7 @@ class TokenPairResponse(BaseModel):
 
 
 class SessionInfo(BaseModel):
-    session_id: str | None = None
+    session_id: UUID | None = None
 
 
 class CurrentUserResponse(BaseModel):

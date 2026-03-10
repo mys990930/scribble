@@ -85,11 +85,20 @@ Response `201`:
 상태 규칙:
 
 - `deactivated_at is null` 이면 활성 디바이스다.
-- 재등록 정책은 v1에서 upsert가 아니라 명시적 해제 후 재등록으로 처리한다.
+- 같은 `(user_id, device_id)` 조합은 하나의 row만 가진다.
+- 해제된 디바이스를 같은 `device_id`로 다시 등록하면 새 row를 만들지 않고 기존 row를 재활성화한다.
+- 이미 활성인 동일 `device_id`를 다시 등록하면 `DEVICE_ALREADY_REGISTERED`다.
 
 관계:
 
 - `users (1) -> (N) devices`
+
+## 요청 메타데이터 규칙
+
+- 등록 시 `last_seen_at`은 서버 현재 시각으로 기록한다.
+- 요청에서 client IP를 얻을 수 있으면 `last_ip`를 기록한다.
+- `User-Agent` 헤더가 있으면 `last_user_agent`를 기록한다.
+- IP 또는 `User-Agent`를 얻지 못하면 해당 컬럼은 `null`을 허용한다.
 
 ## 에러
 

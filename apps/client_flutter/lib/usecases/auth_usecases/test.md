@@ -8,6 +8,8 @@
 
 ## SignIn
 - 정상 계정 → authenticated + 세션 저장
+- 정상 계정 + device bootstrap 성공 → authenticated + 세션 저장
+- 정상 계정 + device bootstrap 실패 → unauthenticated 처리 없이 에러 반환 여부를 정책대로 검증
 - 인증 실패 → unauthenticated + 에러 반환
 - MockAuthService 모드에서 고정 테스트 계정 로그인 성공
 - MockAuthService 모드에서 잘못된 계정 로그인 실패
